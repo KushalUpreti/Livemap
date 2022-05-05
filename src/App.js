@@ -1,16 +1,22 @@
-import data from "./utils/map2.json";
-import classes from "./styles/App.module.css";
+import { useRef, useState } from "react";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
-import { useState } from "react";
+import classes from "./styles/App.module.css";
+import data from "./utils/map2.json";
 
 function App() {
   const [geoData, setGeoData] = useState(data);
+  const [paginationData, setPaginationData] = useState([]);
 
   return (
     <main className={classes.app}>
-      <Map geoData={geoData} />
-      <Sidebar geoData={geoData} page_size={3} />
+      <Map geoData={geoData} paginationData={paginationData} />
+      <Sidebar
+        geoData={geoData}
+        page_size={3}
+        paginationData={paginationData}
+        setPaginationData={setPaginationData}
+      />
     </main>
   );
 }

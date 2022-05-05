@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import classes from "../styles/Sidebar.module.css";
+import DataItem from "../components/DataItem";
 
-export default function Sidebar({ geoData, page_size }) {
-  const [paginationData, setPaginationData] = useState([]);
+export default function Sidebar({
+  geoData,
+  page_size,
+  paginationData,
+  setPaginationData,
+}) {
   const [pageNumber, setPageNumber] = useState(1);
   const [loadMoreVisible, setLoadMoreVisible] = useState(true);
 
@@ -36,16 +41,5 @@ export default function Sidebar({ geoData, page_size }) {
         )}
       </div>
     </aside>
-  );
-}
-
-function DataItem({ item }) {
-  return (
-    <div className={classes.data_item}>
-      <p>Country: {item.properties.NAME}</p>
-      <p>Timezone: {item.properties.TIMEZONE}</p>
-      <p>Longitude: {item.geometry.coordinates[0]}</p>
-      <p>Latitude: {item.geometry.coordinates[1]}</p>
-    </div>
   );
 }
