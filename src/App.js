@@ -1,4 +1,4 @@
-import data from "./utils/map.json";
+import data from "./utils/map2.json";
 import classes from "./styles/App.module.css";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
