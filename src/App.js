@@ -30,9 +30,8 @@ function App() {
 
   return (
     <main className={classes.app}>
-      <Map geoData={geoData} paginationData={paginationData} />
+      <Map paginationData={paginationData} />
       <Sidebar
-        geoData={geoData}
         paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}

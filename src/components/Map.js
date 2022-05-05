@@ -1,7 +1,7 @@
 import classes from "../styles/Map.module.css";
 import DataItem from "./DataItem";
 
-export default function Map({ geoData, paginationData }) {
+export default function Map({ paginationData }) {
   return (
     <section className={classes.map_section}>
       <div className={classes.map_wrapper}>
