@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import classes from "../styles/Sidebar.module.css";
 import DataItem from "../components/DataItem";
 
-export default function Sidebar({ paginationData, loadMore, loadMoreVisible }) {
+export default function Sidebar({
+  paginationData,
+  loadMore,
+  loadMoreVisible,
+  CustomDataItem,
+}) {
   return (
     <aside className={classes.sidebar}>
       <div className={classes.data_wrapper}>
         {paginationData.map((item, index) => {
-          return <DataItem key={index} item={item} />;
+          return <CustomDataItem key={index} item={item} />;
         })}
         {loadMoreVisible && (
           <button className={classes.pagination_button} onClick={loadMore}>
