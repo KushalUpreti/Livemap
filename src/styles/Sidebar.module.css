@@ -15,3 +15,13 @@
     rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
   margin: 4px 0;
 }
+
+.pagination_button {
+  background-color: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+  text-decoration: underline;
+  margin-top: 10px;
+  border: none;
+  cursor: pointer;
+  color: blueviolet;
+}
