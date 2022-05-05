@@ -1,8 +1,19 @@
 // import geojson from "./utils/map.geojson";
-// import map from "./utils/map.json";
+import data from "./utils/map.json";
+import classes from "./styles/App.module.css";
+import Map from "./components/Map";
+import Sidebar from "./components/Sidebar";
+import { useState } from "react";
 
 function App() {
-  return <div className="App"></div>;
+  const [geoData, setGeoData] = useState(data);
+
+  return (
+    <main className={classes.app}>
+      <Map geoData={geoData} />
+      <Sidebar geoData={geoData} />
+    </main>
+  );
 }
 
 export default App;
