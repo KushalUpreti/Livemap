@@ -10,7 +10,7 @@ function App() {
   return (
     <main className={classes.app}>
       <Map geoData={geoData} />
-      <Sidebar geoData={geoData} />
+      <Sidebar geoData={geoData} page_size={3} />
     </main>
   );
 }

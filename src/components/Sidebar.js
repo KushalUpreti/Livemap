@@ -3,32 +3,20 @@ import classes from "../styles/Sidebar.module.css";
 
 export default function Sidebar({ geoData, page_size }) {
   const [paginationData, setPaginationData] = useState(() => {
-    let array = paginate(geoData.features, 3, 1);
+    let array = paginate(geoData.features, page_size, 1);
     return array;
   });
-  const [showLoadMore, setShowLoadMore] = useState(false);
-  const [index, setIndex] = useState(0);
-
-  const pageNumber = useRef(1);
+  const [pageNumber, setPageNumber] = useState(1);
 
   function paginate(array, page_size, page_number) {
     return array.slice((page_number - 1) * page_size, page_number * page_size);
   }
 
-  useEffect(() => {
-    if (geoData.features.length - index > 3) {
-      setShowLoadMore(true);
-      return;
-    }
-    setShowLoadMore(false);
-  }, [index]);
-
   function loadMore() {
-    setIndex((prev) => prev + 3);
-    pageNumber.current++;
+    setPageNumber((prev) => prev++);
     setPaginationData((prev) => {
       let array = [...prev];
-      let newData = paginate(geoData.features, 3, pageNumber.current);
+      let newData = paginate(geoData.features, 3, pageNumber);
       return [...array, ...newData];
     });
   }
@@ -39,7 +27,7 @@ export default function Sidebar({ geoData, page_size }) {
         {paginationData.map((item, index) => {
           return <DataItem key={index} item={item} />;
         })}
-        {showLoadMore && (
+        {geoData.features.length - pageNumber * page_size > 0 && (
           <button className={classes.pagination_button} onClick={loadMore}>
             Load More
           </button>
