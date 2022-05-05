@@ -6,13 +6,13 @@ export default function Sidebar({
   paginationData,
   loadMore,
   loadMoreVisible,
-  CustomDataItem,
+  render,
 }) {
   return (
     <aside className={classes.sidebar}>
       <div className={classes.data_wrapper}>
         {paginationData.map((item, index) => {
-          return <CustomDataItem key={index} item={item} />;
+          return render(item);
         })}
         {loadMoreVisible && (
           <button className={classes.pagination_button} onClick={loadMore}>
