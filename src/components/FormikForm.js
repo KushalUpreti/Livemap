@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import classes from "../styles/Form.module.css";
 
 export default function SignupForm() {
+  useEffect(() => {
+    console.log("Formik rerendered");
+  });
+
   return (
     <Formik
       initialValues={{ firstName: "", lastName: "", email: "" }}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import classes from "../styles/Form.module.css";
 
 export default function Form() {
@@ -6,6 +6,10 @@ export default function Form() {
     firstname: "",
     lastname: "",
     email: "",
+  });
+
+  useEffect(() => {
+    console.log("Form rerendered");
   });
 
   function onFormSubmit(e) {
