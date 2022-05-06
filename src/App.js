@@ -6,6 +6,7 @@ import usePagination from "./hooks/usePagination";
 import FormikForm from "./components/FormikForm";
 import Form from "./components/Form";
 import ReactHookForm from "./components/ReactHookForm";
+import formSchema from "./utils/formSchema.json";
 
 function App() {
   const { loadMore, loadMoreVisible, paginationData } = usePagination(data);
@@ -14,7 +15,7 @@ function App() {
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      <ReactHookForm />
+      <ReactHookForm jsonSchema={formSchema} />
 
       {/* <Map paginationData={paginationData} />
       <Sidebar

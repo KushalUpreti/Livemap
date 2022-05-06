@@ -1,43 +1,51 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 
-export default function ReactHookForm() {
-  const schema = yup
-    .object({
-      firstName: yup.string().required(),
-      age: yup.number().positive().integer().required(),
-    })
-    .required();
-
+export default function ReactHookForm({ jsonSchema }) {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  } = useForm();
   const onSubmit = (data) => console.log(data);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Input field={"firstName"} register={register} errors={errors} />
-      <Input field={"age"} register={register} errors={errors} />
-      <Input type="submit" />
+      {Object.values(jsonSchema.fields).map((item) => {
+        return (
+          <Input
+            field={item.field}
+            register={register}
+            errors={errors}
+            validationRules={item.validations}
+            type={item.type}
+          />
+        );
+      })}
     </form>
   );
 }
 
-function Input({ register, field, errors, type = "text" }) {
+function Input({
+  register,
+  field,
+  errors,
+  validationRules = {},
+  type = "text",
+}) {
+  console.log(errors[field]);
   return (
     <>
       {type === "submit" ? (
         <input type="submit" />
       ) : (
         <>
-          <input {...register(field)} />
-          <p>{errors[field]?.message}</p>
+          <label>{field}</label>
+          <input {...register(field, validationRules)} type={type} />
+          <p>
+            {errors[field] &&
+              `${errors[field].type} ${validationRules[errors[field].type]}`}
+          </p>
         </>
       )}
     </>
