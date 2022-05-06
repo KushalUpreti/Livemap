@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function usePagination(data, filterParameters) {
-  const [geoData, setGeoData] = useState(() => {
-    return filterData(data.features, filterParameters);
-  });
+export default function usePagination(data) {
+  const [geoData, setGeoData] = useState(data);
   const [paginationData, setPaginationData] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [loadMoreVisible, setLoadMoreVisible] = useState(true);
@@ -20,20 +18,6 @@ export default function usePagination(data, filterParameters) {
 
   function paginate(array, page_size, page_number) {
     return array.slice((page_number - 1) * page_size, page_number * page_size);
-  }
-
-  function filterData(data, parameters) {
-    let array = [...data];
-    for (const key in parameters) {
-      const value = parameters[key];
-      array = array.filter((item) => {
-        if (!item.properties[key]) {
-          return;
-        }
-        return item.properties[key].includes(value);
-      });
-    }
-    return array;
   }
 
   function loadMore() {

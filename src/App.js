@@ -10,14 +10,49 @@ import formSchema from "./utils/formSchema.json";
 
 function App() {
   const filterParameters = {
-    NAME: "S",
+    NAME: "A",
     TIMEZONE: "Europe",
+    LONGITUDE: {
+      min: 20,
+      max: 30,
+    },
+    LATITUDE: {
+      min: 1,
+      max: null,
+    },
   };
 
   const { loadMore, loadMoreVisible, paginationData } = usePagination(
-    data,
-    filterParameters
+    filterDataFunction(data.features, filterParameters)
   );
+
+  function filterDataFunction(data, query) {
+    const keysWithMinMax = ["LONGITUDE", "LATITUDE"];
+    const filteredData = data.filter((item) => {
+      for (let key in query) {
+        if (item.properties[key] === undefined) {
+          return false;
+        } else if (keysWithMinMax.includes(key)) {
+          if (
+            query[key]["min"] !== null &&
+            item.properties[key] < query[key]["min"]
+          ) {
+            return false;
+          }
+          if (
+            query[key]["max"] !== null &&
+            item.properties[key] > query[key]["max"]
+          ) {
+            return false;
+          }
+        } else if (!item.properties[key].includes(query[key])) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return filteredData;
+  }
 
   return (
     <main className={classes.app}>
