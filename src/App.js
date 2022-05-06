@@ -9,22 +9,30 @@ import ReactHookForm from "./components/ReactHookForm";
 import formSchema from "./utils/formSchema.json";
 
 function App() {
-  const { loadMore, loadMoreVisible, paginationData } = usePagination(data);
+  const filterParameters = {
+    NAME: "S",
+    TIMEZONE: "Europe",
+  };
+
+  const { loadMore, loadMoreVisible, paginationData } = usePagination(
+    data,
+    filterParameters
+  );
 
   return (
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      <ReactHookForm jsonSchema={formSchema} />
+      {/* <ReactHookForm jsonSchema={formSchema} /> */}
 
-      {/* <Map paginationData={paginationData} />
+      <Map paginationData={paginationData} />
       <Sidebar
         paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
         render={(item) => <CustomDataItem item={item} />}
         CustomDataItem={CustomDataItem}
-      /> */}
+      />
     </main>
   );
 }
