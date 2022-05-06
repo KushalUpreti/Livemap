@@ -11,4 +11,6 @@ p {
 .app {
   display: flex;
   height: 100vh;
+  justify-content: center;
+  gap: 30px;
 }
