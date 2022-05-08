@@ -14,13 +14,13 @@ function App() {
   const filterParameters = {
     NAME: {
       filterType: "text",
-      value: "a",
+      value: "",
       searchType: "endsWith",
     },
     LONGITUDE: {
       filterType: "minmax",
-      min: 20,
-      max: 50,
+      min: 0,
+      max: 100,
     },
     Point: {
       filterType: "boolean",

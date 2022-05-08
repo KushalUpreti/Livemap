@@ -7,6 +7,9 @@ export default function useFilter(data, initialSchema) {
   function updateSchema(formData) {
     for (const key in formData) {
       const element = formData[key];
+      if (!element) {
+        return;
+      }
       let string = key.substring(key.indexOf("(") + 1, key.lastIndexOf(")"));
       if (string) {
         const subKey = key.split(" ")[0];
@@ -24,7 +27,6 @@ export default function useFilter(data, initialSchema) {
   }
 
   function filterDataFunction(data, query) {
-    console.log(query);
     const filteredDataArray = data.filter((item) => {
       for (let key in query) {
         const object = query[key];
