@@ -11,4 +11,6 @@
   justify-content: center;
   align-items: center;
   overflow-y: scroll;
+  margin-top: 10px;
+  padding: 20px 0;
 }

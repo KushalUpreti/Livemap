@@ -1,0 +1,31 @@
+{
+  "_id": "6270f2d3450959fac0e1f3b1",
+  "title": "Filter geo data",
+  "description": "Filter example",
+  "fields": {
+    "country": {
+      "inputType": "input",
+      "field": "NAME",
+      "type": "text",
+      "placeholder": "Search country name",
+      "validations": {}
+    },
+    "longitude": {
+      "inputType": "input",
+      "field": "LONGITUDE (min)",
+      "type": "number",
+      "placeholder": "Enter min longitude",
+      "validations": {}
+    },
+    "Point": {
+      "inputType": "input",
+      "field": "Point",
+      "type": "checkbox",
+      "validations": {}
+    },
+    "submit": {
+      "inputType": "input",
+      "type": "submit"
+    }
+  }
+}

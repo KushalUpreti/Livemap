@@ -1,13 +1,13 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 
-export default function ReactHookForm({ jsonSchema }) {
+export default function ReactHookForm({ jsonSchema, onFormSubmit }) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data) => onFormSubmit(data);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -19,6 +19,7 @@ export default function ReactHookForm({ jsonSchema }) {
             errors={errors}
             validationRules={item.validations}
             type={item.type}
+            placeholder={item.placeholder}
           />
         );
       })}
@@ -31,9 +32,9 @@ function Input({
   field,
   errors,
   validationRules = {},
+  placeholder = "",
   type = "text",
 }) {
-  console.log(errors[field]);
   return (
     <>
       {type === "submit" ? (
@@ -41,7 +42,11 @@ function Input({
       ) : (
         <>
           <label>{field}</label>
-          <input {...register(field, validationRules)} type={type} />
+          <input
+            {...register(field, validationRules)}
+            type={type}
+            placeholder={placeholder}
+          />
           <p>
             {errors[field] &&
               `${errors[field].type} ${validationRules[errors[field].type]}`}

@@ -6,7 +6,9 @@ import usePagination from "./hooks/usePagination";
 import FormikForm from "./components/FormikForm";
 import Form from "./components/Form";
 import ReactHookForm from "./components/ReactHookForm";
-import formSchema from "./utils/formSchema.json";
+import formSchema from "./utils/filterFormSchema.json";
+import { useRef } from "react";
+import useFilter from "./hooks/useFilter";
 
 function App() {
   const filterParameters = {
@@ -26,58 +28,28 @@ function App() {
     },
   };
 
-  const { loadMore, loadMoreVisible, paginationData } = usePagination(
-    filterDataFunction(data.features, filterParameters)
+  const { filteredData, initiateFilter } = useFilter(
+    data.features,
+    filterParameters
   );
 
-  function filterDataFunction(data, query) {
-    const filteredData = data.filter((item) => {
-      let result = true;
-      for (let key in query) {
-        const object = query[key];
-        switch (object.filterType) {
-          case "text":
-            let text = item.properties[key];
-            result = result && text[object.searchType](object.value);
-            break;
-
-          case "boolean":
-            let geoType = item.geometry.type;
-            result = result && object.value ? geoType === key : geoType !== key;
-            break;
-
-          case "minmax":
-            if (object["min"] !== null) {
-              result = result && item.properties[key] > object["min"];
-            }
-            if (object["max"] !== null) {
-              result = result && item.properties[key] < object["max"];
-            }
-            break;
-
-          default:
-            break;
-        }
-      }
-      return result;
-    });
-    return filteredData;
-  }
+  const { loadMore, loadMoreVisible, paginationData } =
+    usePagination(filteredData);
 
   return (
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      {/* <ReactHookForm jsonSchema={formSchema} /> */}
-
-      <Map paginationData={paginationData} />
-      <Sidebar
+      <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
+      {/* <Sidebar
         paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
         render={(item) => <CustomDataItem item={item} />}
         CustomDataItem={CustomDataItem}
-      />
+      /> */}
+
+      <Map paginationData={paginationData} />
     </main>
   );
 }
