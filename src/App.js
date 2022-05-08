@@ -10,15 +10,19 @@ import formSchema from "./utils/formSchema.json";
 
 function App() {
   const filterParameters = {
-    NAME: "A",
-    TIMEZONE: "Europe",
-    LONGITUDE: {
-      min: 20,
-      max: 30,
+    NAME: {
+      filterType: "text",
+      value: "a",
+      searchType: "endsWith",
     },
-    LATITUDE: {
-      min: 1,
-      max: null,
+    LONGITUDE: {
+      filterType: "minmax",
+      min: 20,
+      max: 50,
+    },
+    Point: {
+      filterType: "boolean",
+      value: true,
     },
   };
 
@@ -27,29 +31,35 @@ function App() {
   );
 
   function filterDataFunction(data, query) {
-    const keysWithMinMax = ["LONGITUDE", "LATITUDE"];
     const filteredData = data.filter((item) => {
+      let result = true;
       for (let key in query) {
-        if (item.properties[key] === undefined) {
-          return false;
-        } else if (keysWithMinMax.includes(key)) {
-          if (
-            query[key]["min"] !== null &&
-            item.properties[key] < query[key]["min"]
-          ) {
-            return false;
-          }
-          if (
-            query[key]["max"] !== null &&
-            item.properties[key] > query[key]["max"]
-          ) {
-            return false;
-          }
-        } else if (!item.properties[key].includes(query[key])) {
-          return false;
+        const object = query[key];
+        switch (object.filterType) {
+          case "text":
+            let text = item.properties[key];
+            result = result && text[object.searchType](object.value);
+            break;
+
+          case "boolean":
+            let geoType = item.geometry.type;
+            result = result && object.value ? geoType === key : geoType !== key;
+            break;
+
+          case "minmax":
+            if (object["min"] !== null) {
+              result = result && item.properties[key] > object["min"];
+            }
+            if (object["max"] !== null) {
+              result = result && item.properties[key] < object["max"];
+            }
+            break;
+
+          default:
+            break;
         }
       }
-      return true;
+      return result;
     });
     return filteredData;
   }
