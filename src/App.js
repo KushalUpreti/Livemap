@@ -7,8 +7,9 @@ import FormikForm from "./components/FormikForm";
 import Form from "./components/Form";
 import ReactHookForm from "./components/ReactHookForm";
 import formSchema from "./utils/filterFormSchema.json";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import useFilter from "./hooks/useFilter";
+import DataItem from "./components/DataItem";
 
 function App() {
   const filterParameters = {
@@ -36,20 +37,34 @@ function App() {
   const { loadMore, loadMoreVisible, paginationData } =
     usePagination(filteredData);
 
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  function selectItem(item) {
+    setSelectedItem(item);
+  }
+
   return (
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
-      {/* <Sidebar
+      {/* <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} /> */}
+
+      <Map paginationData={paginationData} selectedItem={selectedItem} />
+      <Sidebar
         paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
-        render={(item) => <CustomDataItem item={item} />}
-        CustomDataItem={CustomDataItem}
-      /> */}
-
-      <Map paginationData={paginationData} />
+        selectItem={selectItem}
+        selectedItem={selectedItem}
+        render={(item, selectItem, selectedItem) => (
+          <DataItem
+            item={item}
+            key={item.properties.NAME}
+            selectItem={selectItem}
+            selectedItem={selectedItem}
+          />
+        )}
+      />
     </main>
   );
 }
