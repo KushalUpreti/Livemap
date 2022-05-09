@@ -27,7 +27,9 @@ export default function useSorting(data, schema) {
           : valueOfB - valueOfA;
       }
       if (typeof valueOfA === "string") {
-        console.log(valueOfA > valueOfB);
+        if (schema.direction === "desc") {
+          return valueOfA < valueOfB ? 1 : -1;
+        }
         return valueOfA > valueOfB ? 1 : -1;
       }
     });
