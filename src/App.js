@@ -47,12 +47,7 @@ function App() {
     if (!selectedItem) {
       return;
     }
-    const itemInList = paginationData.find(
-      (item) => item.properties.NAME === selectedItem.properties.NAME
-    );
-    if (!itemInList) {
-      setSelectedItem(null);
-    }
+    setSelectedItem(null);
   }, [paginationData]);
 
   return (
