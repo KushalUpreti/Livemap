@@ -8,12 +8,14 @@ export default function Map({ paginationData, selectedItem }) {
         {/* {paginationData.map((item, index) => {
           return <DataItem key={index} item={item} />;
         })} */}
-        {selectedItem && (
+        {selectedItem ? (
           <DataItem
             item={selectedItem}
             selectItem={() => {}}
             selectedItem={selectedItem}
           />
+        ) : (
+          <p>No item selected</p>
         )}
       </div>
     </section>
