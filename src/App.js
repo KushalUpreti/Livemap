@@ -10,6 +10,7 @@ import formSchema from "./utils/filterFormSchema.json";
 import { useEffect, useRef, useState } from "react";
 import useFilter from "./hooks/useFilter";
 import DataItem from "./components/DataItem";
+import useSorting from "./hooks/useSorting";
 
 function App() {
   const filterParameters = {
@@ -37,6 +38,11 @@ function App() {
   const { loadMore, loadMoreVisible, paginationData } =
     usePagination(filteredData);
 
+  const { sortedData, sort } = useSorting(paginationData, {
+    field: "properties.NAME",
+    direction: "asc",
+  });
+
   const [selectedItem, setSelectedItem] = useState(null);
 
   function selectItem(item) {
@@ -56,9 +62,9 @@ function App() {
       <Form /> */}
       <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
 
-      <Map paginationData={paginationData} selectedItem={selectedItem} />
+      <Map paginationData={sortedData} selectedItem={selectedItem} />
       <Sidebar
-        paginationData={paginationData}
+        paginationData={sortedData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
         selectItem={selectItem}
