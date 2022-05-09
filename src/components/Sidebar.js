@@ -14,7 +14,7 @@ export default function Sidebar({
     <aside className={classes.sidebar}>
       <div className={classes.data_wrapper}>
         {paginationData.map((item, index) => {
-          return render(item, selectItem, selectedItem);
+          return render(item, index, selectItem, selectedItem);
         })}
         {loadMoreVisible && (
           <button className={classes.pagination_button} onClick={loadMore}>

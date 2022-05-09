@@ -6,7 +6,14 @@ export default function Map({ paginationData, selectedItem }) {
     <section className={classes.map_section}>
       <div className={classes.map_wrapper}>
         {/* {paginationData.map((item, index) => {
-          return <DataItem key={index} item={item} />;
+          return (
+            <DataItem
+              key={index}
+              item={item}
+              selectItem={() => {}}
+              selectedItem={item}
+            />
+          );
         })} */}
         {selectedItem ? (
           <DataItem

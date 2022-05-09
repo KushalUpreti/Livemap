@@ -1,5 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import classes from "../styles/Form.module.css";
 
 export default function ReactHookForm({ jsonSchema, onFormSubmit }) {
   const {
@@ -47,7 +48,7 @@ function Input({
             type={type}
             placeholder={placeholder}
           />
-          <p>
+          <p className={classes.form_p}>
             {errors[field] &&
               `${errors[field].type} ${validationRules[errors[field].type]}`}
           </p>

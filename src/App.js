@@ -7,7 +7,7 @@ import FormikForm from "./components/FormikForm";
 import Form from "./components/Form";
 import ReactHookForm from "./components/ReactHookForm";
 import formSchema from "./utils/filterFormSchema.json";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useFilter from "./hooks/useFilter";
 import DataItem from "./components/DataItem";
 
@@ -43,11 +43,23 @@ function App() {
     setSelectedItem(item);
   }
 
+  useEffect(() => {
+    if (!selectedItem) {
+      return;
+    }
+    const itemInList = paginationData.find(
+      (item) => item.properties.NAME === selectedItem.properties.NAME
+    );
+    if (!itemInList) {
+      setSelectedItem(null);
+    }
+  }, [paginationData]);
+
   return (
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      {/* <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} /> */}
+      <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
 
       <Map paginationData={paginationData} selectedItem={selectedItem} />
       <Sidebar
@@ -56,10 +68,10 @@ function App() {
         loadMore={loadMore}
         selectItem={selectItem}
         selectedItem={selectedItem}
-        render={(item, selectItem, selectedItem) => (
+        render={(item, index, selectItem, selectedItem) => (
           <DataItem
             item={item}
-            key={item.properties.NAME}
+            key={index}
             selectItem={selectItem}
             selectedItem={selectedItem}
           />
