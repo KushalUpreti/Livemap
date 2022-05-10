@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { traverseObject } from "../utils/utilityFunctions";
 
 export default function useSorting(data, schema) {
   const [sortedData, setSortedData] = useState(() => {
@@ -6,7 +7,6 @@ export default function useSorting(data, schema) {
   });
 
   useEffect(() => {
-    console.log("Sorting data");
     sort();
   }, [data]);
 
@@ -35,15 +35,6 @@ export default function useSorting(data, schema) {
       }
     });
     return dataCopy;
-  }
-
-  function traverseObject(path, object) {
-    let current = object;
-    const pathArray = path.split(".");
-    pathArray.forEach((key) => {
-      current = current[key];
-    });
-    return current;
   }
 
   return { sortedData, sort };

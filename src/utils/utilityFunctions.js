@@ -16,3 +16,13 @@ export function getObject(path, object) {
   });
   return current;
 }
+
+export function groupBy(key, arr) {
+  return arr.reduce((prev, curr) => {
+    const value = traverseObject(key, curr);
+    if (value in prev) {
+      return { ...prev, [value]: prev[value].concat(curr) };
+    }
+    return { ...prev, [value]: [curr] };
+  }, {});
+}

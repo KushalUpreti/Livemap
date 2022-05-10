@@ -12,19 +12,9 @@ import useFilter from "./hooks/useFilter";
 import DataItem from "./components/DataItem";
 import useSorting from "./hooks/useSorting";
 import { getObject, traverseObject } from "./utils/utilityFunctions";
+import BarChart from "./components/BarChart";
 
 function App() {
-  const groupBy = (key, arr) =>
-    arr.reduce((prev, curr) => {
-      const value = traverseObject(key, curr);
-      if (value in prev) {
-        return { ...prev, [value]: prev[value].concat(curr) };
-      }
-      return { ...prev, [value]: [curr] };
-    }, {});
-
-  console.log(groupBy("properties.ISO_A2", data.features));
-
   const filterParameters = useRef({
     NAME: {
       filterType: "text",
@@ -74,10 +64,10 @@ function App() {
     <main className={classes.app}>
       {/* <FormikForm />
       <Form /> */}
-      <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
+      {/* <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} /> */}
 
-      <Map paginationData={paginationData} selectedItem={selectedItem} />
-      <Sidebar
+      {/* <Map paginationData={paginationData} selectedItem={selectedItem} /> */}
+      {/* <Sidebar
         paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
@@ -91,7 +81,9 @@ function App() {
             selectedItem={selectedItem}
           />
         )}
-      />
+      /> */}
+
+      <BarChart data={filteredData} />
     </main>
   );
 }
