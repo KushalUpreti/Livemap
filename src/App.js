@@ -11,9 +11,21 @@ import { useEffect, useRef, useState } from "react";
 import useFilter from "./hooks/useFilter";
 import DataItem from "./components/DataItem";
 import useSorting from "./hooks/useSorting";
+import { getObject, traverseObject } from "./utils/utilityFunctions";
 
 function App() {
-  const filterParameters = {
+  const groupBy = (key, arr) =>
+    arr.reduce((prev, curr) => {
+      const value = traverseObject(key, curr);
+      if (value in prev) {
+        return { ...prev, [value]: prev[value].concat(curr) };
+      }
+      return { ...prev, [value]: [curr] };
+    }, {});
+
+  console.log(groupBy("properties.ISO_A2", data.features));
+
+  const filterParameters = useRef({
     NAME: {
       filterType: "text",
       value: "",
@@ -28,20 +40,22 @@ function App() {
       filterType: "boolean",
       value: true,
     },
-  };
+  });
+
+  const dataRef = useRef(data);
 
   const { filteredData, initiateFilter } = useFilter(
-    data.features,
-    filterParameters
+    dataRef.current.features,
+    filterParameters.current
   );
 
-  const { loadMore, loadMoreVisible, paginationData } =
-    usePagination(filteredData);
-
-  const { sortedData, sort } = useSorting(paginationData, {
+  const { sortedData, sort } = useSorting(filteredData, {
     field: "properties.NAME",
     direction: "asc",
   });
+
+  const { loadMore, loadMoreVisible, paginationData } =
+    usePagination(sortedData);
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -62,9 +76,9 @@ function App() {
       <Form /> */}
       <ReactHookForm jsonSchema={formSchema} onFormSubmit={initiateFilter} />
 
-      <Map paginationData={sortedData} selectedItem={selectedItem} />
+      <Map paginationData={paginationData} selectedItem={selectedItem} />
       <Sidebar
-        paginationData={sortedData}
+        paginationData={paginationData}
         loadMoreVisible={loadMoreVisible}
         loadMore={loadMore}
         selectItem={selectItem}

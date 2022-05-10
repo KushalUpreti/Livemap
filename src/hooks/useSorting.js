@@ -6,6 +6,7 @@ export default function useSorting(data, schema) {
   });
 
   useEffect(() => {
+    console.log("Sorting data");
     sort();
   }, [data]);
 
