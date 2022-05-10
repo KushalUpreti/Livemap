@@ -41,6 +41,7 @@
 }
 
 .city_name {
-  writing-mode: vertical-rl;
+  /* writing-mode: vertical-rl; */
   margin-bottom: 5px !important;
+  padding: 0 4px;
 }
