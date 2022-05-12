@@ -4,11 +4,19 @@ import classes from "../styles/Barchar.module.css";
 import randomColor from "randomcolor";
 
 export default function BarChart({ data }) {
-  const countriesRef = useRef(groupBy("properties.ISO_A2", data));
-  const [selectedOption, setSelectedOption] = useState(
-    Object.keys(countriesRef.current)[0]
-  );
+  const countriesRef = useRef(null);
+  const [selectedOption, setSelectedOption] = useState(() => {
+    getGroupBy();
+    return Object.keys(countriesRef.current)[0];
+  });
   const [barData, setBarData] = useState({ upperLimit: 100 });
+
+  function getGroupBy() {
+    if (countriesRef.current === null) {
+      countriesRef.current = groupBy("properties.ISO_A2", data);
+    }
+    return countriesRef.current;
+  }
 
   useEffect(() => {
     let maxPopn = findMaxPopulation(selectedOption);
@@ -19,13 +27,11 @@ export default function BarChart({ data }) {
   }, [selectedOption]);
 
   function findMaxPopulation(key) {
-    let max = 0;
-    countriesRef.current[key].forEach((item) => {
-      let population = traverseObject("properties.POP_MAX", item);
-      if (population > max) {
-        max = population;
-      }
-    });
+    let max = Math.max(
+      ...countriesRef.current[key].map((item) =>
+        traverseObject("properties.POP_MAX", item)
+      )
+    );
     return max;
   }
 
@@ -36,7 +42,7 @@ export default function BarChart({ data }) {
   return (
     <>
       <form action="" style={{ marginTop: "30px" }}>
-        <h3>Choose a country</h3>
+        <h3 className="mb-4">Choose a country</h3>
         <select
           name="country_code"
           value={selectedOption}
