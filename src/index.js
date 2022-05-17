@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./BemApp";
+import App from "./MapApp";
 import "./index.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
