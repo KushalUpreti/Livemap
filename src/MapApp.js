@@ -34,12 +34,15 @@ export default function App() {
     });
 
     map.current.on("click", (e) => {
-      const description = "This is a popup";
-
-      new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(description)
-        .addTo(map.current);
+      const name = String(e.lngLat.lat) + e.lngLat.lng;
+      let coords = [e.lngLat.lng, e.lngLat.lat];
+      map.current.loadImage(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Filled-circle-violet.svg/1024px-Filled-circle-violet.svg.png",
+        (error, image) => {
+          if (error) throw error;
+          addIcon(map.current, coords, image, name);
+        }
+      );
     });
   }, []);
 
@@ -67,9 +70,60 @@ export default function App() {
     });
   }
 
+  function addIcon(map, lngLat, image, name) {
+    map.addImage(name, image);
+
+    map.addSource(name, {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: lngLat,
+            },
+          },
+        ],
+      },
+    });
+
+    map.addLayer({
+      id: name,
+      type: "symbol",
+      source: name, // reference the data source
+      layout: {
+        "icon-image": name, // reference the image
+        "icon-size": 0.025,
+      },
+    });
+  }
+
+  function zoomIn() {
+    let zoomLevel = zoom + 1;
+    setZoom(zoomLevel);
+    map.current.setZoom(zoomLevel);
+  }
+
+  function zoomOut() {
+    if (zoom === 0) {
+      return;
+    }
+    let zoomLevel = zoom - 1;
+    setZoom(zoomLevel);
+    map.current.setZoom(zoomLevel);
+  }
+
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
+      <button onClick={zoomIn} style={{ padding: "2px 14px" }}>
+        +
+      </button>
+      <button onClick={zoomOut} style={{ padding: "2px 14px" }}>
+        -
+      </button>
     </div>
   );
 }
