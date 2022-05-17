@@ -22,22 +22,26 @@ export default function App() {
       zoom: zoom,
     });
 
+    map.current.addControl(new mapboxgl.FullscreenControl());
+    map.current.addControl(new mapboxgl.NavigationControl());
+
     map.current.on("load", () => {
-      countries.features.forEach((element) => {
-        plotPolygon(map.current, element);
+      map.current.addSource("country", {
+        type: "geojson",
+        data: countries,
       });
+      addLayers(map.current, "country");
+    });
+
+    map.current.on("click", (e) => {
+      const description = "This is a popup";
+
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(description)
+        .addTo(map.current);
     });
   }, []);
-
-  function plotPolygon(map, item) {
-    const country = traverseObject("properties.ADMIN", item);
-    console.log(country);
-    map.addSource(country, {
-      type: "geojson",
-      data: item,
-    });
-    addLayers(map, country);
-  }
 
   function addLayers(map, source) {
     map.addLayer({
