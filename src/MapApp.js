@@ -13,6 +13,15 @@ export default function App() {
   const [lat, setLat] = useState(36.9);
   const [zoom, setZoom] = useState(2);
 
+  const markersRef = useRef([]);
+
+  useEffect(() => {
+    if (!map.current) {
+      return;
+    }
+    map.current.setZoom(zoom);
+  }, [zoom]);
+
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
@@ -34,15 +43,14 @@ export default function App() {
     });
 
     map.current.on("click", (e) => {
-      const name = String(e.lngLat.lat) + e.lngLat.lng;
-      let coords = [e.lngLat.lng, e.lngLat.lat];
-      map.current.loadImage(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Filled-circle-violet.svg/1024px-Filled-circle-violet.svg.png",
-        (error, image) => {
-          if (error) throw error;
-          addIcon(map.current, coords, image, name);
-        }
-      );
+      const el = document.createElement("div");
+      el.style.width = `48px`;
+      el.style.height = `48px`;
+      el.style.backgroundSize = "100%";
+      el.style.borderRadius = "50%";
+      el.style.backgroundImage = `url(http://placekitten.com/g/48/48)`;
+      new mapboxgl.Marker(el).setLngLat(e.lngLat).addTo(map.current);
+      markersRef.current.push({ lngLat: e.lngLat, type: "icon" });
     });
   }, []);
 
@@ -70,58 +78,26 @@ export default function App() {
     });
   }
 
-  function addIcon(map, lngLat, image, name) {
-    map.addImage(name, image);
-
-    map.addSource(name, {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: lngLat,
-            },
-          },
-        ],
-      },
-    });
-
-    map.addLayer({
-      id: name,
-      type: "symbol",
-      source: name, // reference the data source
-      layout: {
-        "icon-image": name, // reference the image
-        "icon-size": 0.025,
-      },
-    });
-  }
-
-  function zoomIn() {
-    let zoomLevel = zoom + 1;
-    setZoom(zoomLevel);
-    map.current.setZoom(zoomLevel);
-  }
-
-  function zoomOut() {
-    if (zoom === 0) {
-      return;
-    }
-    let zoomLevel = zoom - 1;
-    setZoom(zoomLevel);
-    map.current.setZoom(zoomLevel);
-  }
-
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
-      <button onClick={zoomIn} style={{ padding: "2px 14px" }}>
+      <button
+        onClick={() => {
+          setZoom((prev) => prev + 1);
+        }}
+        style={{ padding: "2px 14px" }}
+      >
         +
       </button>
-      <button onClick={zoomOut} style={{ padding: "2px 14px" }}>
+      <button
+        onClick={() => {
+          if (zoom === 0) {
+            return;
+          }
+          setZoom((prev) => prev - 1);
+        }}
+        style={{ padding: "2px 14px" }}
+      >
         -
       </button>
     </div>
