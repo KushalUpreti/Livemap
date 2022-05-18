@@ -13,6 +13,7 @@ export default function App() {
   const [lng, setLng] = useState(75.2);
   const [lat, setLat] = useState(26.9);
   const [zoom, setZoom] = useState(3);
+  const [selectedMarker, setSelectedMarker] = useState(null);
 
   useEffect(() => {
     if (!map.current) {
@@ -25,7 +26,7 @@ export default function App() {
     if (!map.current || !map.current.isStyleLoaded()) {
       return;
     }
-    map.current.getSource("points").setData(markerData);
+    map.current.getSource("points").setData(markerData.data);
   }, [markerData]);
 
   useEffect(() => {
@@ -84,6 +85,10 @@ export default function App() {
         return obj;
       });
     });
+
+    map.current.on("click", "points", (e) => {
+      setSelectedMarker({ lng: e.lngLat.lng, lat: e.lngLat.lat, type: e.type });
+    });
   }, []);
 
   function hideAllMarkers() {
@@ -120,6 +125,13 @@ export default function App() {
       <button onClick={showAllMarkers} style={{ padding: "2px 14px" }}>
         Show all markers
       </button>
+      {selectedMarker && (
+        <div>
+          <p>Lng: {selectedMarker.lng}</p>
+          <p>Lat: {selectedMarker.lat}</p>
+          <p>Event: {selectedMarker.type}</p>
+        </div>
+      )}
     </div>
   );
 }
