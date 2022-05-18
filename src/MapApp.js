@@ -9,11 +9,10 @@ mapboxgl.accessToken =
 export default function App() {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const [markerData, setMarkerData] = useState(markers);
   const [lng, setLng] = useState(75.2);
   const [lat, setLat] = useState(26.9);
   const [zoom, setZoom] = useState(3);
-
-  const markersRef = useRef([]);
 
   useEffect(() => {
     if (!map.current) {
@@ -21,6 +20,13 @@ export default function App() {
     }
     map.current.setZoom(zoom);
   }, [zoom]);
+
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) {
+      return;
+    }
+    map.current.getSource("points").setData(markerData);
+  }, [markerData]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -44,7 +50,7 @@ export default function App() {
         "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
         (error, image) => {
           map.current.addImage("custom-marker", image);
-          map.current.addSource("points", markers);
+          map.current.addSource("points", markerData);
           map.current.addLayer({
             id: "points",
             type: "symbol",
@@ -63,25 +69,22 @@ export default function App() {
     });
 
     map.current.on("click", (e) => {
-      const marker = placeMarker(map.current, e.lngLat);
-      let obj = {
-        _id: `${e.lngLat.lng}_${e.lngLat.lat}`,
-        marker,
-      };
-      // markersRef.current.push(obj);
+      setMarkerData((prev) => {
+        let obj = { ...prev };
+        obj.data.features.push({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [e.lngLat.lng, e.lngLat.lat],
+          },
+          properties: {
+            title: "Marker",
+          },
+        });
+        return obj;
+      });
     });
   }, []);
-
-  function placeMarker(map, lngLat) {
-    const el = document.createElement("div");
-    el.style.width = `48px`;
-    el.style.height = `48px`;
-    el.style.backgroundSize = "100%";
-    el.style.borderRadius = "50%";
-    el.style.backgroundImage = `url(http://placekitten.com/g/48/48)`;
-    const marker = new mapboxgl.Marker(el).setLngLat(lngLat).addTo(map);
-    return marker;
-  }
 
   function hideAllMarkers() {
     map.current.setLayoutProperty("points", "visibility", "none");
