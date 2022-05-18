@@ -3,6 +3,7 @@
 
   "features": [
     {
+      "id":1,
       "type": "Feature",
       "properties": { "ADMIN": "Australia", "ISO_A3": "AUS" },
       "geometry": {
@@ -14039,6 +14040,7 @@
     },
     {
       "type": "Feature",
+      "id":2,
       "properties": { "ADMIN": "China", "ISO_A3": "CHN" },
       "geometry": {
         "type": "MultiPolygon",
@@ -28521,6 +28523,7 @@
     },
     {
       "type": "Feature",
+      "id":3,
       "properties": { "ADMIN": "Germany", "ISO_A3": "DEU" },
       "geometry": {
         "type": "MultiPolygon",
@@ -31648,6 +31651,7 @@
       }
     },
     {
+      "id":4,
       "type": "Feature",
       "properties": { "ADMIN": "Nepal", "ISO_A3": "NPL" },
       "geometry": {
@@ -32684,6 +32688,7 @@
       }
     },
     {
+      "id":5,
       "type": "Feature",
       "properties": { "ADMIN": "Zambia", "ISO_A3": "ZMB" },
       "geometry": {

@@ -14,7 +14,7 @@ export default function App() {
   const [lat, setLat] = useState(26.9);
   const [zoom, setZoom] = useState(3);
   const [selectedMarker, setSelectedMarker] = useState(null);
-
+  let hoveredStateId = null;
   useEffect(() => {
     if (!map.current) {
       return;
@@ -46,6 +46,7 @@ export default function App() {
         type: "geojson",
         data: countries,
       });
+      addLayers(map.current, "country");
 
       map.current.loadImage(
         "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
@@ -69,6 +70,46 @@ export default function App() {
       );
     });
 
+    function addLayers(map, source) {
+      map.addLayer({
+        id: source,
+        type: "fill",
+        source,
+        layout: {},
+        paint: {
+          "fill-color": "#0080ff", // blue color fill
+          "fill-opacity": 0.5,
+        },
+      });
+      // Add a black outline around the polygon.
+      map.addLayer({
+        id: source + "_",
+        type: "line",
+        source,
+        layout: {},
+        paint: {
+          "line-color": "#000",
+          "line-width": 3,
+        },
+      });
+
+      map.addLayer({
+        id: "state-fills",
+        type: "fill",
+        source,
+        layout: {},
+        paint: {
+          "fill-color": "#111",
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            1,
+            0.5,
+          ],
+        },
+      });
+    }
+
     map.current.on("click", (e) => {
       setMarkerData((prev) => {
         let obj = { ...prev };
@@ -88,6 +129,32 @@ export default function App() {
 
     map.current.on("click", "points", (e) => {
       setSelectedMarker({ lng: e.lngLat.lng, lat: e.lngLat.lat, type: e.type });
+    });
+
+    map.current.on("mousemove", "state-fills", (e) => {
+      if (e.features.length > 0) {
+        if (hoveredStateId !== null) {
+          map.current.setFeatureState(
+            { source: "country", id: hoveredStateId },
+            { hover: false }
+          );
+        }
+        hoveredStateId = e.features[0].id;
+        map.current.setFeatureState(
+          { source: "country", id: hoveredStateId },
+          { hover: true }
+        );
+      }
+    });
+
+    map.current.on("mouseleave", "state-fills", () => {
+      if (hoveredStateId !== null) {
+        map.current.setFeatureState(
+          { source: "country", id: hoveredStateId },
+          { hover: false }
+        );
+      }
+      hoveredStateId = null;
     });
   }, []);
 
