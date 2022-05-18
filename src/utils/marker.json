@@ -1,0 +1,28 @@
+{
+  "type": "geojson",
+  "data": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [74.49687500000081, 29.49687500000081]
+        },
+        "properties": {
+          "title": "Mapbox B"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [83.99463015548122, 27.663830048171647]
+        },
+        "properties": {
+          "title": "Mapbox A"
+        }
+      }
+    ]
+  }
+}

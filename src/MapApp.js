@@ -1,7 +1,7 @@
 import mapboxgl from "mapbox-gl";
 import { useRef, useEffect, useState } from "react";
 import countries from "./utils/countries.json";
-import { traverseObject } from "./utils/utilityFunctions";
+import markers from "./utils/marker.json";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiaWN5aG90c2hvdG8iLCJhIjoiY2tmeHQwc3E5MjRxajJxbzhmbDN1bjJ5aiJ9.mNKmhIjRyKxFkJYrm4dMqg";
@@ -10,19 +10,9 @@ export default function App() {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng, setLng] = useState(75.2);
-  const [lat, setLat] = useState(36.9);
-  const [zoom, setZoom] = useState(2);
+  const [lat, setLat] = useState(26.9);
+  const [zoom, setZoom] = useState(3);
 
-  const markerDataRef = useRef([
-    {
-      _id: "79.40428757248839_22.56473467857026",
-      lngLat: { lng: 74.49687500000081, lat: 29.49687500000081 },
-    },
-    {
-      _id: "83.99463015548122_27.663830048171647",
-      lngLat: { lng: 83.99463015548122, lat: 27.663830048171647 },
-    },
-  ]);
   const markersRef = useRef([]);
 
   useEffect(() => {
@@ -49,7 +39,27 @@ export default function App() {
         type: "geojson",
         data: countries,
       });
-      addLayers(map.current, "country");
+
+      map.current.loadImage(
+        "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        (error, image) => {
+          map.current.addImage("custom-marker", image);
+          map.current.addSource("points", markers);
+          map.current.addLayer({
+            id: "points",
+            type: "symbol",
+            source: "points",
+            layout: {
+              "icon-image": "custom-marker",
+              // get the title name from the source's "title" property
+              "text-field": ["get", "title"],
+              "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+              "text-offset": [0, 1.25],
+              "text-anchor": "top",
+            },
+          });
+        }
+      );
     });
 
     map.current.on("click", (e) => {
@@ -58,22 +68,9 @@ export default function App() {
         _id: `${e.lngLat.lng}_${e.lngLat.lat}`,
         marker,
       };
-      markersRef.current.push(obj);
+      // markersRef.current.push(obj);
     });
-
-    addMarkers(markerDataRef.current);
   }, []);
-
-  function addMarkers(list) {
-    list.forEach((element) => {
-      const marker = placeMarker(map.current, element.lngLat);
-      let obj = {
-        _id: element._id,
-        marker,
-      };
-      markersRef.current.push(obj);
-    });
-  }
 
   function placeMarker(map, lngLat) {
     const el = document.createElement("div");
@@ -86,42 +83,12 @@ export default function App() {
     return marker;
   }
 
-  function addLayers(map, source) {
-    map.addLayer({
-      id: source,
-      type: "fill",
-      source,
-      layout: {},
-      paint: {
-        "fill-color": "#0080ff", // blue color fill
-        "fill-opacity": 0.5,
-      },
-    });
-    // Add a black outline around the polygon.
-    map.addLayer({
-      id: source + "_",
-      type: "line",
-      source,
-      layout: {},
-      paint: {
-        "line-color": "#000",
-        "line-width": 3,
-      },
-    });
-  }
-
   function hideAllMarkers() {
-    markersRef.current.forEach((element) => {
-      let marker = element.marker.getElement();
-      marker.style.visibility = "hidden";
-    });
+    map.current.setLayoutProperty("points", "visibility", "none");
   }
 
   function showAllMarkers() {
-    markersRef.current.forEach((element) => {
-      let marker = element.marker.getElement();
-      marker.style.visibility = "visible";
-    });
+    map.current.setLayoutProperty("points", "visibility", "visible");
   }
 
   return (
