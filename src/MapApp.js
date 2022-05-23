@@ -1,6 +1,6 @@
 import mapboxgl from "mapbox-gl";
 import { useRef, useEffect, useState } from "react";
-import countries from "./utils/countries.json";
+import countries from "./utils/nep.json";
 import markers from "./utils/marker.json";
 
 mapboxgl.accessToken =
@@ -15,6 +15,7 @@ export default function App() {
   const [zoom, setZoom] = useState(3);
   const [selectedMarker, setSelectedMarker] = useState(null);
   let hoveredStateId = null;
+
   useEffect(() => {
     if (!map.current) {
       return;
@@ -42,11 +43,86 @@ export default function App() {
     map.current.addControl(new mapboxgl.NavigationControl());
 
     map.current.on("load", () => {
+      map.current.setLayoutProperty("country-label", "text-field", [
+        "format",
+        ["get", "name_en"],
+        { "font-scale": 1.2 },
+        "\n",
+        {},
+        ["get", "name"],
+        {
+          "font-scale": 0.8,
+          "text-font": [
+            "literal",
+            ["DIN Offc Pro Italic", "Arial Unicode MS Regular"],
+          ],
+        },
+      ]);
+
       map.current.addSource("country", {
         type: "geojson",
         data: countries,
       });
-      addLayers(map.current, "country");
+      map.current.addLayer({
+        id: "country",
+        type: "fill",
+        source: "country",
+        layout: {},
+        paint: {
+          "fill-color": "#0080ff", // blue color fill
+          "fill-opacity": 0.5,
+        },
+      });
+      // Add a black outline around the polygon.
+      map.current.addLayer({
+        id: "country_",
+        type: "line",
+        source: "country",
+        layout: {},
+        paint: {
+          "line-color": "#000",
+          "line-width": 3,
+        },
+      });
+
+      map.current.addLayer({
+        id: "state-fills",
+        type: "fill",
+        source: "country",
+        layout: {},
+        paint: {
+          "fill-color": "#111",
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            1,
+            0.5,
+          ],
+        },
+      });
+
+      map.current.addLayer({
+        id: "historical-places",
+        type: "circle",
+        source: {
+          type: "vector",
+          url: "mapbox://examples.8ribcg3i",
+        },
+        "source-layer": "HPC_landmarks-a88vge",
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10,
+            ["/", ["-", 2017, ["number", ["get", "Constructi"], 2017]], 30],
+            13,
+            ["/", ["-", 2017, ["number", ["get", "Constructi"], 2017]], 10],
+          ],
+          "circle-opacity": 0.8,
+          "circle-color": "rgb(171, 72, 33)",
+        },
+      });
 
       map.current.loadImage(
         "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
@@ -69,46 +145,6 @@ export default function App() {
         }
       );
     });
-
-    function addLayers(map, source) {
-      map.addLayer({
-        id: source,
-        type: "fill",
-        source,
-        layout: {},
-        paint: {
-          "fill-color": "#0080ff", // blue color fill
-          "fill-opacity": 0.5,
-        },
-      });
-      // Add a black outline around the polygon.
-      map.addLayer({
-        id: source + "_",
-        type: "line",
-        source,
-        layout: {},
-        paint: {
-          "line-color": "#000",
-          "line-width": 3,
-        },
-      });
-
-      map.addLayer({
-        id: "state-fills",
-        type: "fill",
-        source,
-        layout: {},
-        paint: {
-          "fill-color": "#111",
-          "fill-opacity": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            1,
-            0.5,
-          ],
-        },
-      });
-    }
 
     map.current.on("click", (e) => {
       setMarkerData((prev) => {

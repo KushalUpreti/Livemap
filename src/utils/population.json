@@ -1,0 +1,44 @@
+[
+  {
+    "ADM1_EN": "1",
+    "population": 4534943,
+    "latitude": 27.268516,
+    "longitude": 87.28534
+  },
+  {
+    "ADM1_EN": "2",
+    "population": 5404145,
+    "latitude": 26.877215,
+    "longitude": 85.834177
+  },
+  {
+    "ADM1_EN": "3",
+    "population": 5529452,
+    "latitude": 27.716813,
+    "longitude": 85.504367
+  },
+  {
+    "ADM1_EN": "4",
+    "population": 2478258,
+    "latitude": 27.268516,
+    "longitude": 84.009228
+  },
+  {
+    "ADM1_EN": "5",
+    "population": 4473576,
+    "latitude": 28.008194,
+    "longitude": 82.711976
+  },
+  {
+    "ADM1_EN": "6",
+    "population": 1521613,
+    "latitude": 29.367066,
+    "longitude": 80.963984
+  },
+  {
+    "ADM1_EN": "7",
+    "population": 2552517,
+    "latitude": 29.098627,
+    "longitude": 82.305211
+  }
+]
