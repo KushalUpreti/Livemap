@@ -46,9 +46,6 @@ export default function App() {
       statsData.path
     );
 
-    map.current.addControl(new mapboxgl.FullscreenControl());
-    map.current.addControl(new mapboxgl.NavigationControl());
-
     map.current.on("load", () => {
       map.current.addSource("stats", {
         type: "geojson",
