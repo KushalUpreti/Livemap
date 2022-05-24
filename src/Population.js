@@ -100,7 +100,7 @@ export default function App() {
     let prev = 0;
     for (let index = range; index <= roundedPopulation + 1; index += range) {
       layers.push(`${prev}-${index}`);
-      colors.push(
+      colors.unshift(
         `rgb(112,${Math.floor((index / roundedPopulation) * 255)},20)`
       );
       prev = index;
