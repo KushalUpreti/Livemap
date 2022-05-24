@@ -74,7 +74,8 @@ export default function App() {
         key.style.backgroundColor = color;
 
         const value = document.createElement("span");
-        value.innerHTML = `${layer}`;
+        const array = layer.split("-");
+        value.innerHTML = `${array[0]} - ${array[1]}`;
         item.appendChild(key);
         item.appendChild(value);
         legend.appendChild(item);
