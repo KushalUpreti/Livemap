@@ -21,3 +21,12 @@
   overflow: auto;
   border-radius: 3px;
 }
+
+button {
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 1em 4px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}

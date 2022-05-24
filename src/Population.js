@@ -15,6 +15,7 @@ export default function App() {
   const [lng, setLng] = useState(84.2);
   const [lat, setLat] = useState(28.1);
   const [zoom, setZoom] = useState(5.5);
+  const [currentStat, setCurrentStat] = useState("population");
 
   const [statsData, setStatsData] = useState({
     data: population,
@@ -85,7 +86,6 @@ export default function App() {
   }, []);
 
   function createLayers(obj, size, path) {
-    console.log(path);
     const layers = [];
     const colors = [];
     const max = Math.max(...obj.map((e) => traverseObject(path, e)));
@@ -165,6 +165,7 @@ export default function App() {
   }
 
   function setPopulationStats() {
+    setCurrentStat("population");
     setStatsData({
       data: population,
       property: "population",
@@ -174,6 +175,7 @@ export default function App() {
   }
 
   function setLiteracyStats() {
+    setCurrentStat("literacy");
     setStatsData({
       data: literacy,
       property: "literacy",
@@ -185,8 +187,22 @@ export default function App() {
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
-      <button onClick={setPopulationStats}>Population</button>
-      <button onClick={setLiteracyStats}>Literacy</button>
+      <button
+        onClick={setPopulationStats}
+        style={{
+          backgroundColor: currentStat === "population" ? "grey" : "white",
+        }}
+      >
+        Population
+      </button>
+      <button
+        onClick={setLiteracyStats}
+        style={{
+          backgroundColor: currentStat === "literacy" ? "grey" : "white",
+        }}
+      >
+        Literacy
+      </button>
       <div className="map-overlay" id="legend"></div>
     </div>
   );
