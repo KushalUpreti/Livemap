@@ -13,7 +13,7 @@ export default function App() {
   const [lng, setLng] = useState(84.2);
   const [lat, setLat] = useState(28.1);
   const [zoom, setZoom] = useState(5.5);
-
+  createLayers(population);
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
@@ -23,26 +23,7 @@ export default function App() {
       zoom: zoom,
     });
 
-    const layers = [
-      "0-1000000",
-      "1000000-2000000",
-      "2000000-3000000",
-      "3000000-4000000",
-      "4000000-5000000",
-      "5000000-6000000",
-      "6000000-7000000",
-      "7000000+",
-    ];
-    const colors = [
-      "#FFEDA0",
-      "#FED976",
-      "#FEB24C",
-      "#FD8D3C",
-      "#FC4E2A",
-      "#E31A1C",
-      "#BD0026",
-      "#800026",
-    ];
+    const { layers, colors } = createLayers(population);
 
     map.current.addControl(new mapboxgl.FullscreenControl());
     map.current.addControl(new mapboxgl.NavigationControl());
@@ -101,6 +82,32 @@ export default function App() {
     });
   }, []);
 
+  function roundToNearest(num) {
+    let base = (Math.log(num) * Math.LOG10E + 1) | 0;
+    --base;
+    return Math.ceil(num / Math.pow(10, base)) * Math.pow(10, base);
+  }
+
+  function createLayers(obj) {
+    const layers = [];
+    const colors = [];
+    let max = 0;
+    obj.forEach((item) => {
+      max = Math.max(max, item.population);
+    });
+    const roundedPopulation = roundToNearest(max);
+    const range = Math.ceil(roundedPopulation / 7);
+    let prev = 0;
+    for (let index = range; index <= roundedPopulation + 1; index += range) {
+      layers.push(`${prev}-${index}`);
+      colors.push(
+        `rgb(112,${Math.floor((index / roundedPopulation) * 255)},20)`
+      );
+      prev = index;
+    }
+    return { layers, colors };
+  }
+
   function generatePopulationExpression(range, colors) {
     if (range.length !== colors.length) {
       return [];
@@ -127,7 +134,7 @@ export default function App() {
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
-      <div class="map-overlay" id="legend"></div>
+      <div className="map-overlay" id="legend"></div>
     </div>
   );
 }
