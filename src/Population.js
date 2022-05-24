@@ -2,7 +2,9 @@ import mapboxgl from "mapbox-gl";
 import { useRef, useEffect, useState } from "react";
 import countries from "./utils/nep.json";
 import population from "./utils/population.json";
+import literacy from "./utils/literacy.json";
 import "./styles/Population.css";
+import { traverseObject } from "./utils/utilityFunctions";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiaWN5aG90c2hvdG8iLCJhIjoiY2tmeHQwc3E5MjRxajJxbzhmbDN1bjJ5aiJ9.mNKmhIjRyKxFkJYrm4dMqg";
@@ -13,7 +15,21 @@ export default function App() {
   const [lng, setLng] = useState(84.2);
   const [lat, setLat] = useState(28.1);
   const [zoom, setZoom] = useState(5.5);
-  createLayers(population);
+
+  const [statsData, setStatsData] = useState({
+    data: population,
+    property: "population",
+    path: "population",
+    size: 1000000,
+  });
+
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) {
+      return;
+    }
+    updateStats();
+  }, [statsData]);
+
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
@@ -23,13 +39,17 @@ export default function App() {
       zoom: zoom,
     });
 
-    const { layers, colors } = createLayers(population);
+    const { layers, colors } = createLayers(
+      statsData.data,
+      statsData.size,
+      statsData.path
+    );
 
     map.current.addControl(new mapboxgl.FullscreenControl());
     map.current.addControl(new mapboxgl.NavigationControl());
 
     map.current.on("load", () => {
-      map.current.addSource("country", {
+      map.current.addSource("stats", {
         type: "geojson",
         data: countries,
       });
@@ -38,7 +58,7 @@ export default function App() {
       map.current.addLayer({
         id: "country_",
         type: "line",
-        source: "country",
+        source: "stats",
         layout: {},
         paint: {
           "line-color": "#000",
@@ -49,67 +69,36 @@ export default function App() {
       map.current.addLayer({
         id: "state-fills",
         type: "fill",
-        source: "country",
+        source: "stats",
         layout: {},
         paint: {
-          "fill-color": generatePopulationExpression(layers, colors),
+          "fill-color": generatePopulationExpression(
+            layers,
+            colors,
+            statsData.property
+          ),
         },
       });
 
-      population.forEach((item) => {
-        map.current.setFeatureState(
-          { source: "country", id: +item.ADM1_EN },
-          { population: item.population }
-        );
-      });
-
-      // create legend
-      const legend = document.getElementById("legend");
-
-      layers.forEach((layer, i) => {
-        const color = colors[i];
-        const item = document.createElement("div");
-        const key = document.createElement("span");
-        key.className = "legend-key";
-        key.style.backgroundColor = color;
-
-        const value = document.createElement("span");
-        const array = layer.split("-");
-        value.innerHTML = `${array[0]} - ${array[1]}`;
-        item.appendChild(key);
-        item.appendChild(value);
-        legend.appendChild(item);
-      });
+      addLegend(layers, colors);
     });
   }, []);
 
-  function roundToNearest(num) {
-    let base = (Math.log(num) * Math.LOG10E + 1) | 0;
-    --base;
-    return Math.ceil(num / Math.pow(10, base)) * Math.pow(10, base);
-  }
-
-  function createLayers(obj) {
+  function createLayers(obj, size, path) {
+    console.log(path);
     const layers = [];
     const colors = [];
-    let max = 0;
-    obj.forEach((item) => {
-      max = Math.max(max, item.population);
-    });
-    const roundedPopulation = roundToNearest(max);
-    const range = Math.ceil(roundedPopulation / 7);
+    const max = Math.max(...obj.map((e) => traverseObject(path, e)));
     let prev = 0;
-    for (let index = range; index <= roundedPopulation + 1; index += range) {
+    for (let index = size; index <= max + size; index += size) {
       layers.push(`${prev}-${index}`);
-      colors.unshift(
-        `rgb(112,${Math.floor((index / roundedPopulation) * 255)},20)`
-      );
+      colors.unshift(`rgb(112,${Math.floor((index / max) * 255)},20)`);
       prev = index;
     }
     return { layers, colors };
   }
 
-  function generatePopulationExpression(range, colors) {
+  function generatePopulationExpression(range, colors, property) {
     if (range.length !== colors.length) {
       return [];
     }
@@ -120,8 +109,8 @@ export default function App() {
         "boolean",
         [
           "all",
-          [">", ["feature-state", "population"], +currentRange[0]],
-          ["<", ["feature-state", "population"], +currentRange[1]],
+          [">", ["feature-state", property], +currentRange[0]],
+          ["<", ["feature-state", property], +currentRange[1]],
         ],
         true,
       ];
@@ -132,9 +121,72 @@ export default function App() {
     return expression;
   }
 
+  function addLegend(layers, colors) {
+    statsData.data.forEach((item) => {
+      map.current.setFeatureState(
+        { source: "stats", id: +item.ADM1_EN },
+        { [statsData.property]: traverseObject(statsData.path, item) }
+      );
+    });
+
+    const legend = document.getElementById("legend");
+    legend.innerHTML = "";
+
+    layers.forEach((layer, i) => {
+      const color = colors[i];
+      const item = document.createElement("div");
+      const key = document.createElement("span");
+      key.className = "legend-key";
+      key.style.backgroundColor = color;
+
+      const value = document.createElement("span");
+      const array = layer.split("-");
+      value.innerHTML = `${array[0]} - ${array[1]}`;
+      item.appendChild(key);
+      item.appendChild(value);
+      legend.appendChild(item);
+    });
+  }
+
+  function updateStats() {
+    const { layers, colors } = createLayers(
+      statsData.data,
+      statsData.size,
+      statsData.path
+    );
+
+    map.current.setPaintProperty(
+      "state-fills",
+      "fill-color",
+      generatePopulationExpression(layers, colors, statsData.property)
+    );
+
+    addLegend(layers, colors);
+  }
+
+  function setPopulationStats() {
+    setStatsData({
+      data: population,
+      property: "population",
+      path: "population",
+      size: 1000000,
+    });
+  }
+
+  function setLiteracyStats() {
+    setStatsData({
+      data: literacy,
+      property: "literacy",
+      path: "literacy",
+      size: 10,
+    });
+  }
+
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
+      <button onClick={setPopulationStats}>Population</button>
+      <button onClick={setLiteracyStats}>Literacy</button>
       <div className="map-overlay" id="legend"></div>
     </div>
   );
