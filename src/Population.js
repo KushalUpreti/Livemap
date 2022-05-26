@@ -187,7 +187,7 @@ export default function App() {
           setStatistics(covid, "cases", "cases", 3000000);
         }}
         style={{
-          backgroundColor: statsData.property === "covid" ? "grey" : "white",
+          backgroundColor: statsData.property === "cases" ? "grey" : "white",
         }}
       >
         COVID-19
