@@ -1,8 +1,8 @@
 import mapboxgl from "mapbox-gl";
 import { useRef, useEffect, useState } from "react";
-import countries from "./utils/nep.json";
-import population from "./utils/population.json";
-import literacy from "./utils/literacy.json";
+import hdi from "./utils/stats/hdi.json";
+import covid from "./utils/stats/covid.json";
+import literacy from "./utils/stats/literacy.json";
 import "./styles/Population.css";
 import { traverseObject } from "./utils/utilityFunctions";
 
@@ -12,15 +12,15 @@ mapboxgl.accessToken =
 export default function App() {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(84.2);
-  const [lat, setLat] = useState(28.1);
-  const [zoom, setZoom] = useState(5.5);
+  const [lng, setLng] = useState(12);
+  const [lat, setLat] = useState(50);
+  const [zoom, setZoom] = useState(1.6);
 
   const [statsData, setStatsData] = useState({
-    data: population,
-    property: "population",
-    path: "population",
-    size: 1000000,
+    data: hdi,
+    property: "hdi",
+    path: "hdi",
+    size: 0.1,
   });
 
   useEffect(() => {
@@ -39,47 +39,58 @@ export default function App() {
       zoom: zoom,
     });
 
-    const { layers, colors } = createLayers(
-      statsData.data,
-      statsData.size,
-      statsData.path
-    );
-
     map.current.on("load", () => {
-      map.current.addSource("stats", {
-        type: "geojson",
-        data: countries,
+      map.current.addSource("countries", {
+        type: "vector",
+        url: "mapbox://mapbox.country-boundaries-v1",
       });
+      const { layers, colors } = createLayers(
+        statsData.data,
+        statsData.size,
+        statsData.path
+      );
 
-      // Add a black outline around the polygon.
-      map.current.addLayer({
-        id: "country_",
-        type: "line",
-        source: "stats",
-        layout: {},
-        paint: {
-          "line-color": "#000",
-          "line-width": 2,
+      const matchExpression = generateMatchExpression(
+        statsData.data,
+        statsData.property,
+        layers,
+        colors
+      );
+
+      map.current.addLayer(
+        {
+          id: "countries-join",
+          type: "fill",
+          source: "countries",
+          "source-layer": "country_boundaries",
+          paint: {
+            "fill-color": matchExpression,
+          },
         },
-      });
-
-      map.current.addLayer({
-        id: "state-fills",
-        type: "fill",
-        source: "stats",
-        layout: {},
-        paint: {
-          "fill-color": generatePopulationExpression(
-            layers,
-            colors,
-            statsData.property
-          ),
-        },
-      });
-
+        "admin-1-boundary-bg"
+      );
       addLegend(layers, colors);
     });
   }, []);
+
+  function generateMatchExpression(data, property, layers, colors) {
+    const matchExpression = ["match", ["get", "iso_3166_1_alpha_3"]];
+
+    for (const row of data) {
+      const value = row[property];
+      for (let i = 0; i < layers.length; i++) {
+        const element = layers[i];
+        const array = element.split("-");
+        if (value >= +array[0] && value <= +array[1]) {
+          matchExpression.push(row["code"], colors[i]);
+          break;
+        }
+      }
+    }
+
+    matchExpression.push("rgba(0, 0, 0, 0)");
+    return matchExpression;
+  }
 
   function createLayers(obj, size, path) {
     const layers = [];
@@ -87,44 +98,18 @@ export default function App() {
     const max = Math.max(...obj.map((e) => traverseObject(path, e)));
     let prev = 0;
     for (let index = size; index <= max + size; index += size) {
-      layers.push(`${prev}-${index}`);
-      colors.unshift(`rgb(112,${Math.floor((index / max) * 255)},20)`);
-      prev = index;
+      layers.push(`${prev}-${index.toFixed(2)}`);
+      const color = `rgb(0, ${Math.min(
+        Math.floor((index / max) * 255),
+        255
+      )}, 0)`;
+      colors.unshift(color);
+      prev = index.toFixed(2);
     }
     return { layers, colors };
   }
 
-  function generatePopulationExpression(range, colors, property) {
-    if (range.length !== colors.length) {
-      return [];
-    }
-    let expression = ["case"];
-    for (let i = 0; i < range.length - 1; i++) {
-      const currentRange = range[i].split("-");
-      let curr = [
-        "boolean",
-        [
-          "all",
-          [">", ["feature-state", property], +currentRange[0]],
-          ["<", ["feature-state", property], +currentRange[1]],
-        ],
-        true,
-      ];
-      expression.push(curr);
-      expression.push(colors[i]);
-    }
-    expression.push(colors[colors.length - 1]);
-    return expression;
-  }
-
   function addLegend(layers, colors) {
-    statsData.data.forEach((item) => {
-      map.current.setFeatureState(
-        { source: "stats", id: +item.ADM1_EN },
-        { [statsData.property]: traverseObject(statsData.path, item) }
-      );
-    });
-
     const legend = document.getElementById("legend");
     legend.innerHTML = "";
 
@@ -152,29 +137,25 @@ export default function App() {
     );
 
     map.current.setPaintProperty(
-      "state-fills",
+      "countries-join",
       "fill-color",
-      generatePopulationExpression(layers, colors, statsData.property)
+      generateMatchExpression(
+        statsData.data,
+        statsData.property,
+        layers,
+        colors
+      )
     );
 
     addLegend(layers, colors);
   }
 
-  function setPopulationStats() {
+  function setStatistics(data, property, path, size) {
     setStatsData({
-      data: population,
-      property: "population",
-      path: "population",
-      size: 1000000,
-    });
-  }
-
-  function setLiteracyStats() {
-    setStatsData({
-      data: literacy,
-      property: "literacy",
-      path: "literacy",
-      size: 10,
+      data,
+      property,
+      path,
+      size,
     });
   }
 
@@ -182,21 +163,34 @@ export default function App() {
     <div>
       <div ref={mapContainer} className="map-container" />
       <button
-        onClick={setPopulationStats}
+        onClick={() => {
+          setStatistics(hdi, "hdi", "hdi", 0.1);
+        }}
         style={{
-          backgroundColor:
-            statsData.property === "population" ? "grey" : "white",
+          backgroundColor: statsData.property === "hdi" ? "grey" : "white",
         }}
       >
-        Population
+        HDI
       </button>
       <button
-        onClick={setLiteracyStats}
+        onClick={() => {
+          setStatistics(literacy, "literacy", "literacy", 0.1);
+        }}
         style={{
           backgroundColor: statsData.property === "literacy" ? "grey" : "white",
         }}
       >
         Literacy
+      </button>
+      <button
+        onClick={() => {
+          setStatistics(covid, "cases", "cases", 3000000);
+        }}
+        style={{
+          backgroundColor: statsData.property === "covid" ? "grey" : "white",
+        }}
+      >
+        COVID-19
       </button>
       <div className="map-overlay" id="legend"></div>
     </div>
