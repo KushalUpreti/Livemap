@@ -16,12 +16,30 @@ export default function App() {
   const [lat, setLat] = useState(50);
   const [zoom, setZoom] = useState(1.6);
 
-  const [statsData, setStatsData] = useState({
-    data: hdi,
-    property: "hdi",
-    path: "hdi",
-    size: 0.1,
-  });
+  const dataSources = {
+    hdi: {
+      data: hdi,
+      property: "hdi",
+      path: "hdi",
+      size: 0.1,
+    },
+    literacy: {
+      data: literacy,
+      property: "literacy",
+      path: "literacy",
+      size: 0.1,
+    },
+    covid19: {
+      data: covid,
+      property: "cases",
+      path: "cases",
+      size: 3000000,
+    },
+  };
+
+  const [statsData, setStatsData] = useState("hdi");
+  const [layers, setLayers] = useState([]);
+  const [colors, setColors] = useState([]);
 
   useEffect(() => {
     if (!map.current || !map.current.isStyleLoaded()) {
@@ -31,7 +49,7 @@ export default function App() {
   }, [statsData]);
 
   useEffect(() => {
-    if (map.current) return; // initialize map only once
+    if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/light-v10",
@@ -44,32 +62,8 @@ export default function App() {
         type: "vector",
         url: "mapbox://mapbox.country-boundaries-v1",
       });
-      const { layers, colors } = createLayers(
-        statsData.data,
-        statsData.size,
-        statsData.path
-      );
 
-      const matchExpression = generateMatchExpression(
-        statsData.data,
-        statsData.property,
-        layers,
-        colors
-      );
-
-      map.current.addLayer(
-        {
-          id: "countries-join",
-          type: "fill",
-          source: "countries",
-          "source-layer": "country_boundaries",
-          paint: {
-            "fill-color": matchExpression,
-          },
-        },
-        "admin-1-boundary-bg"
-      );
-      addLegend(layers, colors);
+      updateStats();
     });
   }, []);
 
@@ -92,7 +86,7 @@ export default function App() {
     return matchExpression;
   }
 
-  function createLayers(obj, size, path) {
+  function createColorRange(obj, size, path) {
     const layers = [];
     const colors = [];
     const max = Math.max(...obj.map((e) => traverseObject(path, e)));
@@ -109,90 +103,65 @@ export default function App() {
     return { layers, colors };
   }
 
-  function addLegend(layers, colors) {
-    const legend = document.getElementById("legend");
-    legend.innerHTML = "";
-
-    layers.forEach((layer, i) => {
-      const color = colors[i];
-      const item = document.createElement("div");
-      const key = document.createElement("span");
-      key.className = "legend-key";
-      key.style.backgroundColor = color;
-
-      const value = document.createElement("span");
-      const array = layer.split("-");
-      value.innerHTML = `${array[0]} - ${array[1]}`;
-      item.appendChild(key);
-      item.appendChild(value);
-      legend.appendChild(item);
-    });
-  }
-
   function updateStats() {
-    const { layers, colors } = createLayers(
-      statsData.data,
-      statsData.size,
-      statsData.path
-    );
-
-    map.current.setPaintProperty(
-      "countries-join",
-      "fill-color",
-      generateMatchExpression(
-        statsData.data,
-        statsData.property,
-        layers,
-        colors
-      )
-    );
-
-    addLegend(layers, colors);
+    const { data, size, path, property } = dataSources[statsData];
+    const { layers, colors } = createColorRange(data, size, path);
+    setLayers(layers);
+    setColors(colors);
+    const expression = generateMatchExpression(data, property, layers, colors);
+    const paint = map.current.getPaintProperty("countries-join", "fill-color");
+    if (!paint) {
+      map.current.addLayer(
+        {
+          id: "countries-join",
+          type: "fill",
+          source: "countries",
+          "source-layer": "country_boundaries",
+          paint: {
+            "fill-color": expression,
+          },
+        },
+        "admin-1-boundary-bg"
+      );
+      return;
+    }
+    map.current.setPaintProperty("countries-join", "fill-color", expression);
   }
 
-  function setStatistics(data, property, path, size) {
-    setStatsData({
-      data,
-      property,
-      path,
-      size,
-    });
+  function setStatistics(key) {
+    setStatsData(key);
   }
 
   return (
     <div>
       <div ref={mapContainer} className="map-container" />
-      <button
-        onClick={() => {
-          setStatistics(hdi, "hdi", "hdi", 0.1);
-        }}
-        style={{
-          backgroundColor: statsData.property === "hdi" ? "grey" : "white",
-        }}
-      >
-        HDI
-      </button>
-      <button
-        onClick={() => {
-          setStatistics(literacy, "literacy", "literacy", 0.1);
-        }}
-        style={{
-          backgroundColor: statsData.property === "literacy" ? "grey" : "white",
-        }}
-      >
-        Literacy
-      </button>
-      <button
-        onClick={() => {
-          setStatistics(covid, "cases", "cases", 3000000);
-        }}
-        style={{
-          backgroundColor: statsData.property === "cases" ? "grey" : "white",
-        }}
-      >
-        COVID-19
-      </button>
-      <div className="map-overlay" id="legend"></div>
+      {Object.keys(dataSources).map((item) => {
+        return (
+          <button
+            key={item}
+            onClick={() => {
+              setStatistics(item);
+            }}
+          >
+            {item}
+          </button>
+        );
+      })}
+
+      <div className="map-overlay" id="legend">
+        {layers.map((item, index) => {
+          const array = item.split("-");
+          return (
+            <div>
+              <span
+                className="legend-key"
+                style={{ backgroundColor: colors[index] }}
+              />
+              <span>{`${array[0]} - ${array[1]}`}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
