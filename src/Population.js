@@ -61,7 +61,35 @@ export default function App() {
       map.current.addSource("countries", {
         type: "vector",
         url: "mapbox://mapbox.country-boundaries-v1",
+        promoteId: "iso_3166_1_alpha_3",
       });
+
+      map.current.addLayer(
+        {
+          id: "countries-join",
+          type: "fill",
+          source: "countries",
+          "source-layer": "country_boundaries",
+          paint: {},
+        },
+        "admin-1-boundary-bg"
+      );
+
+      map.current.addLayer(
+        {
+          id: "countries-highlighted",
+          type: "fill",
+          source: "countries",
+          "source-layer": "country_boundaries",
+          paint: {
+            "fill-outline-color": "#484896",
+            "fill-color": "#6e599f",
+            "fill-opacity": 0.75,
+          },
+          filter: ["in", "iso_3166_1_alpha_3", ""],
+        },
+        "admin-1-boundary-bg"
+      );
 
       updateStats();
     });
@@ -86,6 +114,16 @@ export default function App() {
     return matchExpression;
   }
 
+  // function generateMatchExpression(property, layers, colors) {
+  //   const matchExpression = ["interpolate", ["linear"], ["zoom"]];
+  //   layers.forEach((item, index) => {
+  //     const array = item.split("-");
+  //     matchExpression.push(+array[1], colors[index]);
+  //   });
+
+  //   return matchExpression;
+  // }
+
   function createColorRange(obj, size, path) {
     const layers = [];
     const colors = [];
@@ -109,27 +147,49 @@ export default function App() {
     setLayers(layers);
     setColors(colors);
     const expression = generateMatchExpression(data, property, layers, colors);
-    const paint = map.current.getPaintProperty("countries-join", "fill-color");
-    if (!paint) {
-      map.current.addLayer(
-        {
-          id: "countries-join",
-          type: "fill",
-          source: "countries",
-          "source-layer": "country_boundaries",
-          paint: {
-            "fill-color": expression,
-          },
-        },
-        "admin-1-boundary-bg"
-      );
-      return;
-    }
     map.current.setPaintProperty("countries-join", "fill-color", expression);
+    // data.forEach((item) => {
+    //   map.current.setFeatureState(
+    //     { source: "countries", id: item.code, sourceLayer: "countries" },
+    //     { [property]: item[property] }
+    //   );
+    // });
   }
 
   function setStatistics(key) {
     setStatsData(key);
+  }
+
+  function mouseEnterHandler(item) {
+    const array = item.split("-");
+    const property = dataSources[statsData].property;
+    const selectedFeatures = map.current.queryRenderedFeatures({
+      layers: ["countries-join"],
+    });
+    const filtered = selectedFeatures.filter((item) => {
+      const exists = dataSources[statsData].data.find((data) => {
+        return data.code === item.properties.iso_3166_1_alpha_3;
+      });
+      return (
+        exists && exists[property] >= +array[0] && exists[property] <= +array[1]
+      );
+    });
+    const countryNames = filtered.map(
+      (item) => item.properties.iso_3166_1_alpha_3
+    );
+    map.current.setFilter("countries-highlighted", [
+      "in",
+      "iso_3166_1_alpha_3",
+      ...countryNames,
+    ]);
+  }
+
+  function mouseExitHandler() {
+    map.current.setFilter("countries-highlighted", [
+      "in",
+      "iso_3166_1_alpha_3",
+      "",
+    ]);
   }
 
   return (
@@ -139,6 +199,7 @@ export default function App() {
         return (
           <button
             key={item}
+            style={{ backgroundColor: item === statsData ? "grey" : "white" }}
             onClick={() => {
               setStatistics(item);
             }}
@@ -152,7 +213,14 @@ export default function App() {
         {layers.map((item, index) => {
           const array = item.split("-");
           return (
-            <div>
+            <div
+              key={item}
+              className="legend-row"
+              onMouseEnter={() => {
+                mouseEnterHandler(item);
+              }}
+              onMouseLeave={mouseExitHandler}
+            >
               <span
                 className="legend-key"
                 style={{ backgroundColor: colors[index] }}

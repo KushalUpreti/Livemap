@@ -11,6 +11,9 @@
   height: 10px;
   margin-right: 5px;
 }
+.legend-row {
+  cursor: pointer;
+}
 .map-overlay {
   position: absolute;
   top: 30%;
