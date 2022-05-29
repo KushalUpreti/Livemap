@@ -1,0 +1,38 @@
+.main {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.object-list {
+  width: 10em;
+  margin-right: 3em;
+}
+
+.object-list__item {
+  padding: 0.5em 4px;
+  margin: 4px 0;
+  cursor: pointer;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.object-list__item:hover {
+  background-color: rgb(206, 206, 206);
+}
+
+.save {
+  padding: 0.5em 1.5em;
+  background-color: coral;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+  margin-top: 2em;
+}
+
+.property {
+  margin: 4px 0;
+}
+
+.property > input {
+  margin-right: 20px;
+}

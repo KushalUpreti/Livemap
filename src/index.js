@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./Population";
+import App from "./AdminApp";
 import "./index.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import reportWebVitals from "./reportWebVitals";
