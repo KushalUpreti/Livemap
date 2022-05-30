@@ -19,14 +19,22 @@
   background-color: rgb(206, 206, 206);
 }
 
-.save {
-  padding: 0.5em 1.5em;
+.action-button {
+  padding: 0.5em 1em;
   background-color: coral;
   border: none;
   border-radius: 3px;
   color: white;
   cursor: pointer;
-  margin-top: 2em;
+  margin: 2em 6px;
+}
+
+.save {
+  background-color: rgb(8, 155, 253);
+}
+
+.cancel {
+  background-color: red;
 }
 
 .property {
