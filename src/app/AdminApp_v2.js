@@ -53,7 +53,7 @@ export default function App() {
       </div>
 
       <div>
-        <CountryCreator createObject={createObject} />
+        <ObjectCreator createObject={createObject} />
 
         {selectedObject && (
           <ObjectEditor data={selectedObject} saveObject={saveCountry} />
@@ -90,7 +90,7 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function CountryCreator({ createObject }) {
+function ObjectCreator({ createObject }) {
   const [createCountryText, setCreateCountryText] = useState("");
 
   return (
