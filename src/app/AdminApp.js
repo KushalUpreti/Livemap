@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./styles/AdminApp.css";
+import "../styles/AdminApp.css";
 
 export default function App() {
   const [countries, setCountries] = useState([]);

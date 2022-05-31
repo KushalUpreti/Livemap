@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import hdi from "./utils/stats/hdi.json";
 import covid from "./utils/stats/covid.json";
 import literacy from "./utils/stats/literacy.json";
-import "./styles/Population.css";
+import "../styles/Population.css";
 import { traverseObject } from "./utils/utilityFunctions";
 
 mapboxgl.accessToken =
