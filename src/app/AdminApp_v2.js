@@ -50,11 +50,13 @@ export default function App() {
       </div>
 
       <div>
-        <ObjectEditor
-          data={selectedObject}
-          saveObject={saveCountry}
-          createObject={createObject}
-        />
+        <div className="create">
+          <button onClick={createObject}>Create Object</button>
+        </div>
+
+        {selectedObject && (
+          <ObjectEditor data={selectedObject} saveObject={saveCountry} />
+        )}
       </div>
     </main>
   );
@@ -87,7 +89,7 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectEditor({ data, saveObject, createObject }) {
+function ObjectEditor({ data, saveObject }) {
   const [tempObject, setTempObject] = useState(data);
 
   useEffect(() => {
@@ -129,48 +131,43 @@ function ObjectEditor({ data, saveObject, createObject }) {
 
   return (
     <div className="edit">
-      <div className="create">
-        <button onClick={createObject}>Create Object</button>
-      </div>
-      {data && (
+      <div>
+        <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
+        <p>Add or edit properties</p>
         <div>
-          <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
-          <p>Add or edit properties</p>
-          <div>
-            {tempObject &&
-              Object.keys(tempObject).map((key) => {
-                if (key === "cities" || key === "id") {
-                  return;
-                }
-                return (
-                  <PropertyForm
-                    key={key}
-                    keyText={key}
-                    valueText={tempObject[key]}
-                    updateKey={updateKey}
-                    updateValue={updateValue}
-                  />
-                );
-              })}
+          {tempObject &&
+            Object.keys(tempObject).map((key) => {
+              if (key === "cities" || key === "id") {
+                return;
+              }
+              return (
+                <PropertyForm
+                  key={key}
+                  keyText={key}
+                  valueText={tempObject[key]}
+                  updateKey={updateKey}
+                  updateValue={updateValue}
+                />
+              );
+            })}
 
-            <button className="action-button" onClick={addProperty}>
-              Add Property
-            </button>
+          <button className="action-button" onClick={addProperty}>
+            Add Property
+          </button>
 
-            <button
-              className="action-button save"
-              onClick={() => {
-                saveObject(tempObject);
-              }}
-            >
-              Save
-            </button>
-            <button className="action-button cancel" onClick={init}>
-              Cancel
-            </button>
-          </div>
+          <button
+            className="action-button save"
+            onClick={() => {
+              saveObject(tempObject);
+            }}
+          >
+            Save
+          </button>
+          <button className="action-button cancel" onClick={init}>
+            Cancel
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
