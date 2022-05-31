@@ -53,11 +53,11 @@ export default function App() {
       </div>
 
       <div>
-        <ObjectCreator createObject={createObject} />
-
-        {selectedObject && (
-          <ObjectEditor data={selectedObject} saveObject={saveCountry} />
-        )}
+        <ObjectEditor
+          data={selectedObject}
+          saveObject={saveCountry}
+          createObject={createObject}
+        />
       </div>
     </main>
   );
@@ -90,33 +90,9 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectCreator({ createObject }) {
-  const [createCountryText, setCreateCountryText] = useState("");
-
-  return (
-    <div className="edit__create">
-      <h3>Create new country</h3>
-      <form
-        onSubmit={(e) => {
-          createObject(e, createCountryText);
-          setCreateCountryText("");
-        }}
-      >
-        <input
-          type="text"
-          value={createCountryText}
-          onChange={(e) => {
-            setCreateCountryText(e.target.value);
-          }}
-        />
-        <input type="submit" value="Create" />
-      </form>
-    </div>
-  );
-}
-
-function ObjectEditor({ data, saveObject }) {
+function ObjectEditor({ data, saveObject, createObject }) {
   const [tempObject, setTempObject] = useState(data);
+  const [createCountryText, setCreateCountryText] = useState("");
 
   useEffect(() => {
     setTempObject(data);
@@ -157,43 +133,63 @@ function ObjectEditor({ data, saveObject }) {
 
   return (
     <div className="edit">
-      <div>
-        <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
-        <p>Add or edit properties</p>
-        <div>
-          {tempObject &&
-            Object.keys(tempObject).map((key) => {
-              if (key === "cities" || key === "id") {
-                return;
-              }
-              return (
-                <PropertyForm
-                  key={key}
-                  keyText={key}
-                  valueText={tempObject[key]}
-                  updateKey={updateKey}
-                  updateValue={updateValue}
-                />
-              );
-            })}
-
-          <button className="action-button" onClick={addProperty}>
-            Add Property
-          </button>
-
-          <button
-            className="action-button save"
-            onClick={() => {
-              saveObject(tempObject);
+      <div className="edit__create">
+        <h3>Create new country</h3>
+        <form
+          onSubmit={(e) => {
+            createObject(e, createCountryText);
+            setCreateCountryText("");
+          }}
+        >
+          <input
+            type="text"
+            value={createCountryText}
+            onChange={(e) => {
+              setCreateCountryText(e.target.value);
             }}
-          >
-            Save
-          </button>
-          <button className="action-button cancel" onClick={init}>
-            Cancel
-          </button>
-        </div>
+          />
+          <input type="submit" value="Create" />
+        </form>
       </div>
+      {data && (
+        <div>
+          <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
+          <p>Add or edit properties</p>
+          <div>
+            {tempObject &&
+              Object.keys(tempObject).map((key) => {
+                if (key === "cities" || key === "id") {
+                  return;
+                }
+                return (
+                  <PropertyForm
+                    key={key}
+                    keyText={key}
+                    valueText={tempObject[key]}
+                    updateKey={updateKey}
+                    updateValue={updateValue}
+                  />
+                );
+              })}
+
+            <button className="action-button" onClick={addProperty}>
+              Add Property
+            </button>
+
+            <button
+              className="action-button save"
+              onClick={() => {
+                saveObject(tempObject);
+              }}
+            >
+              Save
+            </button>
+            <button className="action-button cancel" onClick={init}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
