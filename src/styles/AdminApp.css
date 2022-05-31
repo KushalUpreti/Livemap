@@ -16,7 +16,7 @@
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 .object-list__item:hover {
-  background-color: rgb(206, 206, 206);
+  outline: 1px solid gray;
 }
 
 .action-button {

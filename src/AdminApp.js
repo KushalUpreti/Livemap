@@ -3,27 +3,48 @@ import "./styles/AdminApp.css";
 
 export default function App() {
   const [countries, setCountries] = useState([]);
-  const [selectedObject, setSelectedObject] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [createText, setCreateText] = useState("");
   const [cityText, setCityText] = useState("");
   const [cities, setCities] = useState([]);
 
   function createObject(e) {
+    const countryName = createText;
     e.preventDefault();
     if (!createText.trim()) {
       return;
     }
     setCountries((prev) => {
       const object = [...prev];
-      const newCountry = { name: createText, [""]: "", cities: [] };
+      const newCountry = { name: countryName, [""]: "", cities: [] };
       object.push(newCountry);
       return object;
     });
-    setSelectedObject(createText);
     setCreateText("");
+    setSelectedCountry(countryName);
+    updateCitiesList(countryName, true);
+    setSelectedCity("");
   }
 
-  function saveObject(updatedObj) {
+  function createCity(e) {
+    e.preventDefault();
+    if (!cityText.trim()) {
+      return;
+    }
+    setCountries((prev) => {
+      const object = [...prev];
+      const index = object.findIndex((item) => item.name === selectedCountry);
+      const city = { name: cityText, [""]: "" };
+      object[index].cities.push(city);
+      return object;
+    });
+    setSelectedCity(cityText);
+    setCityText("");
+    updateCitiesList(selectedCountry);
+  }
+
+  function saveCountry(updatedObj) {
     delete updatedObj[""];
     setCountries((prev) => {
       let array = [...prev];
@@ -33,64 +54,109 @@ export default function App() {
     });
   }
 
+  function saveCity(updatedCity) {
+    delete updatedCity[""];
+    setCountries((prev) => {
+      let array = [...prev];
+      let countryIndex = array.findIndex(
+        (item) => item.name === selectedCountry
+      );
+      const cities = array[countryIndex].cities;
+      let cityIndex = cities.findIndex(
+        (item) => item.name === updatedCity.name
+      );
+      cities[cityIndex] = updatedCity;
+      return array;
+    });
+  }
+
   function switchCountries(item) {
-    setSelectedObject(item);
+    setSelectedCountry(item);
+    setSelectedCity("");
+    updateCitiesList(item);
+  }
+
+  function updateCitiesList(item, newCountry = false) {
+    if (newCountry) {
+      setCities([]);
+      return;
+    }
     const country = countries.find((obj) => obj.name === item);
     setCities(country.cities);
+  }
+
+  function switchCities(item) {
+    setSelectedCity(item);
   }
 
   return (
     <main className="main">
       <div className="object-list">
-        <div>
-          <h3>Countries</h3>
-          <div>
-            {countries.map((item) => {
-              return (
-                <div
-                  key={item.name}
-                  className="object-list__item"
-                  onClick={() => {
-                    switchCountries(item.name);
-                  }}
-                >
-                  {item.name}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <h3>Cities</h3>
-          <div>
-            {cities.map((item) => {
-              return <div className="object-list__item">{item}</div>;
-            })}
-          </div>
-        </div>
+        <ItemList
+          data={countries}
+          switchFunction={switchCountries}
+          selectedVar={selectedCountry}
+          title="Countries"
+        />
+        {countries.length > 0 && (
+          <ItemList
+            data={cities}
+            switchFunction={switchCities}
+            selectedVar={selectedCity}
+            title="Cities"
+          />
+        )}
       </div>
 
       <ObjectEditor
         createObject={createObject}
         createText={createText}
         data={countries}
-        selectedObject={selectedObject}
+        selectedObject={selectedCountry}
         setCreateText={setCreateText}
-        saveObject={saveObject}
+        saveObject={saveCountry}
         title="Create new country"
       />
 
-      {/* <ObjectEditor
-        createObject={createObject}
-        createText={cityText}
-        data={countries}
-        selectedObject={selectedObject}
-        setCreateText={setCityText}
-        saveObject={saveObject}
-        title="Create new city"
-      /> */}
+      {selectedCountry && (
+        <ObjectEditor
+          createObject={createCity}
+          createText={cityText}
+          data={cities}
+          selectedObject={selectedCity}
+          setCreateText={setCityText}
+          saveObject={saveCity}
+          title={`Create new city for ${selectedCountry}`}
+        />
+      )}
     </main>
+  );
+}
+
+function ItemList({ data, switchFunction, selectedVar, title }) {
+  return (
+    <div>
+      <h3>{title}</h3>
+      <div>
+        {data.map((item, index) => {
+          return (
+            <div
+              key={index}
+              className="object-list__item"
+              style={{
+                backgroundColor:
+                  selectedVar === item.name ? "rgb(206, 206, 206" : "white",
+              }}
+              onClick={() => {
+                switchFunction(item.name);
+              }}
+            >
+              {item.name}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -111,10 +177,11 @@ function ObjectEditor({
     }
     let currentObject = data.filter((item) => item.name === selectedObject);
     setTempObject(currentObject[0]);
-  }, [selectedObject]);
+  }, [selectedObject, data]);
 
   function cancel() {
-    setTempObject(data[selectedObject]);
+    let currentObject = data.filter((item) => item.name === selectedObject);
+    setTempObject(currentObject[0]);
   }
 
   function addProperty() {
