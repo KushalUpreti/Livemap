@@ -4,29 +4,27 @@ import "../styles/AdminApp.css";
 
 export default function App() {
   const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [createCountryText, setCreateCountryText] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
-  function createObject(e) {
+  function createObject(e, countryName) {
     const countryId = uuidv4();
     e.preventDefault();
-    if (!createCountryText.trim()) {
+    if (!countryName.trim()) {
       return;
     }
+    const newCountry = {
+      id: countryId,
+      name: countryName,
+      cities: [],
+      population: 0,
+      language: "N/A",
+    };
     setCountries((prev) => {
       const object = [...prev];
-      const newCountry = {
-        id: countryId,
-        name: createCountryText,
-        cities: [],
-        population: 0,
-        language: "N/A",
-      };
       object.push(newCountry);
       return object;
     });
-    setCreateCountryText("");
-    setSelectedCountry(countryId);
+    setSelectedCountry(newCountry);
   }
 
   function saveCountry(updatedObj) {
@@ -49,20 +47,18 @@ export default function App() {
         <ItemList
           data={countries}
           switchFunction={switchCountries}
-          selectedVar={selectedCountry}
+          selectedVar={selectedCountry && selectedCountry.id}
           title="Countries"
         />
       </div>
 
-      <ObjectEditor
-        createObject={createObject}
-        createCountryText={createCountryText}
-        data={countries}
-        selectedObject={selectedCountry}
-        setCreateCountryText={setCreateCountryText}
-        saveObject={saveCountry}
-        title="Create new country"
-      />
+      <div>
+        <CountryCreator createObject={createObject} />
+
+        {selectedCountry && (
+          <ObjectEditor data={selectedCountry} saveObject={saveCountry} />
+        )}
+      </div>
     </main>
   );
 }
@@ -82,7 +78,7 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
                   selectedVar === item.id ? "rgb(206, 206, 206" : "white",
               }}
               onClick={() => {
-                switchFunction(item.id);
+                switchFunction(item);
               }}
             >
               {item.name}
@@ -94,27 +90,40 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectEditor({
-  createObject,
-  createCountryText,
-  selectedObject,
-  data,
-  saveObject,
-  title,
-  setCreateCountryText,
-}) {
-  const [tempObject, setTempObject] = useState(null);
+function CountryCreator({ createObject }) {
+  const [createCountryText, setCreateCountryText] = useState("");
+
+  return (
+    <div className="edit__create">
+      <h3>Create new country</h3>
+      <form
+        onSubmit={(e) => {
+          createObject(e, createCountryText);
+          setCreateCountryText("");
+        }}
+      >
+        <input
+          type="text"
+          value={createCountryText}
+          onChange={(e) => {
+            setCreateCountryText(e.target.value);
+          }}
+        />
+        <input type="submit" value="Create" />
+      </form>
+    </div>
+  );
+}
+
+function ObjectEditor({ data, saveObject }) {
+  const [tempObject, setTempObject] = useState(data);
 
   useEffect(() => {
-    if (!selectedObject) {
-      return;
-    }
-    init();
-  }, [selectedObject, data]);
+    setTempObject(data);
+  }, [data]);
 
   function init() {
-    let currentObject = data.filter((item) => item.id === selectedObject);
-    setTempObject(currentObject[0]);
+    setTempObject(data);
   }
 
   function addProperty() {
@@ -148,59 +157,43 @@ function ObjectEditor({
 
   return (
     <div className="edit">
-      <div className="edit__create">
-        <h3>{title}</h3>
-        <form onSubmit={createObject}>
-          <input
-            type="text"
-            value={createCountryText}
-            onChange={(e) => {
-              setCreateCountryText(e.target.value);
-            }}
-          />
-          <input type="submit" value="Create" />
-        </form>
-      </div>
-
-      {selectedObject && (
+      <div>
+        <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
+        <p>Add or edit properties</p>
         <div>
-          <h3>{tempObject ? tempObject.name : "Loading.."}</h3>
-          <p>Add or edit properties</p>
-          <div>
-            {tempObject &&
-              Object.keys(tempObject).map((key) => {
-                if (key === "cities" || key === "id") {
-                  return;
-                }
-                return (
-                  <PropertyForm
-                    key={key}
-                    keyText={key}
-                    valueText={tempObject[key]}
-                    updateKey={updateKey}
-                    updateValue={updateValue}
-                  />
-                );
-              })}
+          {tempObject &&
+            Object.keys(tempObject).map((key) => {
+              if (key === "cities" || key === "id") {
+                return;
+              }
+              return (
+                <PropertyForm
+                  key={key}
+                  keyText={key}
+                  valueText={tempObject[key]}
+                  updateKey={updateKey}
+                  updateValue={updateValue}
+                />
+              );
+            })}
 
-            <button className="action-button" onClick={addProperty}>
-              Add Property
-            </button>
+          <button className="action-button" onClick={addProperty}>
+            Add Property
+          </button>
 
-            <button
-              className="action-button save"
-              onClick={() => {
-                saveObject(tempObject);
-              }}
-            >
-              Save
-            </button>
-            <button className="action-button cancel" onClick={init}>
-              Cancel
-            </button>
-          </div>
+          <button
+            className="action-button save"
+            onClick={() => {
+              saveObject(tempObject);
+            }}
+          >
+            Save
+          </button>
+          <button className="action-button cancel" onClick={init}>
+            Cancel
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
