@@ -48,7 +48,7 @@ export default function App() {
           data={objects}
           switchFunction={switchCountries}
           selectedVar={selectedObject && selectedObject.id}
-          title="objects"
+          title="Country"
         />
       </div>
 
