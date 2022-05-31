@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import "../styles/AdminApp.css";
 
 export default function App() {
-  const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [objects, setObjects] = useState([]);
+  const [selectedObject, setSelectedObject] = useState(null);
 
   function createObject(e, countryName) {
     const countryId = uuidv4();
@@ -19,17 +19,17 @@ export default function App() {
       population: 0,
       language: "N/A",
     };
-    setCountries((prev) => {
+    setObjects((prev) => {
       const object = [...prev];
       object.push(newCountry);
       return object;
     });
-    setSelectedCountry(newCountry);
+    setSelectedObject(newCountry);
   }
 
   function saveCountry(updatedObj) {
     delete updatedObj[""];
-    setCountries((prev) => {
+    setObjects((prev) => {
       let array = [...prev];
       let index = array.findIndex((item) => item.id === updatedObj.id);
       array[index] = updatedObj;
@@ -38,25 +38,25 @@ export default function App() {
   }
 
   function switchCountries(item) {
-    setSelectedCountry(item);
+    setSelectedObject(item);
   }
 
   return (
     <main className="main">
       <div className="object-list">
         <ItemList
-          data={countries}
+          data={objects}
           switchFunction={switchCountries}
-          selectedVar={selectedCountry && selectedCountry.id}
-          title="Countries"
+          selectedVar={selectedObject && selectedObject.id}
+          title="objects"
         />
       </div>
 
       <div>
         <CountryCreator createObject={createObject} />
 
-        {selectedCountry && (
-          <ObjectEditor data={selectedCountry} saveObject={saveCountry} />
+        {selectedObject && (
+          <ObjectEditor data={selectedObject} saveObject={saveCountry} />
         )}
       </div>
     </main>
