@@ -6,15 +6,12 @@ export default function App() {
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
 
-  function createObject(e, countryName) {
+  function createObject() {
     const countryId = uuidv4();
-    e.preventDefault();
-    if (!countryName.trim()) {
-      return;
-    }
+
     const newCountry = {
       id: countryId,
-      name: countryName,
+      name: "N/A",
       cities: [],
       population: 0,
       language: "N/A",
@@ -92,7 +89,6 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
 
 function ObjectEditor({ data, saveObject, createObject }) {
   const [tempObject, setTempObject] = useState(data);
-  const [createCountryText, setCreateCountryText] = useState("");
 
   useEffect(() => {
     setTempObject(data);
@@ -133,23 +129,8 @@ function ObjectEditor({ data, saveObject, createObject }) {
 
   return (
     <div className="edit">
-      <div className="edit__create">
-        <h3>Create new country</h3>
-        <form
-          onSubmit={(e) => {
-            createObject(e, createCountryText);
-            setCreateCountryText("");
-          }}
-        >
-          <input
-            type="text"
-            value={createCountryText}
-            onChange={(e) => {
-              setCreateCountryText(e.target.value);
-            }}
-          />
-          <input type="submit" value="Create" />
-        </form>
+      <div className="create">
+        <button onClick={createObject}>Create Object</button>
       </div>
       {data && (
         <div>
