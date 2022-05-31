@@ -1,19 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./styles/AdminApp.css";
 
 export default function App() {
-  const [objects, setObjects] = useState({});
+  const [countries, setCountries] = useState([]);
   const [selectedObject, setSelectedObject] = useState("");
   const [createText, setCreateText] = useState("");
+  const [cityText, setCityText] = useState("");
+  const [cities, setCities] = useState([]);
 
   function createObject(e) {
     e.preventDefault();
     if (!createText.trim()) {
       return;
     }
-    setObjects((prev) => {
-      let object = { ...prev };
-      object[createText] = { [""]: "" };
+    setCountries((prev) => {
+      const object = [...prev];
+      const newCountry = { name: createText, [""]: "", cities: [] };
+      object.push(newCountry);
       return object;
     });
     setSelectedObject(createText);
@@ -21,74 +24,73 @@ export default function App() {
   }
 
   function saveObject(updatedObj) {
-    setObjects((prev) => {
-      let obj = { ...prev };
-      obj[selectedObject] = updatedObj;
-      return obj;
+    delete updatedObj[""];
+    setCountries((prev) => {
+      let array = [...prev];
+      let index = array.findIndex((item) => item.name === updatedObj.name);
+      array[index] = updatedObj;
+      return array;
     });
+  }
+
+  function switchCountries(item) {
+    setSelectedObject(item);
+    const country = countries.find((obj) => obj.name === item);
+    setCities(country.cities);
   }
 
   return (
     <main className="main">
       <div className="object-list">
-        <h3>Countries</h3>
         <div>
-          {Object.keys(objects).map((item) => {
-            return (
-              <div
-                className="object-list__item"
-                onClick={() => {
-                  setSelectedObject(item);
-                }}
-              >
-                {item}
-              </div>
-            );
-          })}
+          <h3>Countries</h3>
+          <div>
+            {countries.map((item) => {
+              return (
+                <div
+                  key={item.name}
+                  className="object-list__item"
+                  onClick={() => {
+                    switchCountries(item.name);
+                  }}
+                >
+                  {item.name}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <h3>Cities</h3>
+          <div>
+            {cities.map((item) => {
+              return <div className="object-list__item">{item}</div>;
+            })}
+          </div>
         </div>
       </div>
 
       <ObjectEditor
         createObject={createObject}
         createText={createText}
-        objects={objects}
+        data={countries}
         selectedObject={selectedObject}
         setCreateText={setCreateText}
         saveObject={saveObject}
+        title="Create new country"
       />
+
+      {/* <ObjectEditor
+        createObject={createObject}
+        createText={cityText}
+        data={countries}
+        selectedObject={selectedObject}
+        setCreateText={setCityText}
+        saveObject={saveObject}
+        title="Create new city"
+      /> */}
     </main>
-  );
-}
-
-function PropertyForm({ keyText, valueText, updateKey, updateValue }) {
-  const [keyState, setKeyState] = useState(keyText);
-  const [valueState, setvalueState] = useState(valueText);
-
-  return (
-    <form className="property">
-      <label htmlFor="">Key: </label>
-      <input
-        type="text"
-        value={keyState}
-        onChange={(e) => {
-          setKeyState(e.target.value);
-        }}
-        onBlur={() => {
-          updateKey(keyText, keyState);
-        }}
-      />
-      <label htmlFor="">Value: </label>
-      <input
-        type="text"
-        value={valueState}
-        onChange={(e) => {
-          setvalueState(e.target.value);
-        }}
-        onBlur={() => {
-          updateValue(keyText, valueState);
-        }}
-      />
-    </form>
   );
 }
 
@@ -96,24 +98,33 @@ function ObjectEditor({
   createObject,
   createText,
   selectedObject,
-  objects,
+  data,
   saveObject,
+  title,
   setCreateText,
 }) {
-  const [tempObject, setTempObject] = useState(objects[selectedObject]);
+  const [tempObject, setTempObject] = useState(null);
+
+  useEffect(() => {
+    if (!selectedObject) {
+      return;
+    }
+    let currentObject = data.filter((item) => item.name === selectedObject);
+    setTempObject(currentObject[0]);
+  }, [selectedObject]);
 
   function cancel() {
-    setTempObject(objects[selectedObject]);
+    setTempObject(data[selectedObject]);
   }
 
   function addProperty() {
     setTempObject((prev) => {
-      let objects = { ...prev };
-      if (objects[""]) {
-        return objects;
+      let data = { ...prev };
+      if (data[""]) {
+        return data;
       }
-      objects[""] = "";
-      return objects;
+      data[""] = "";
+      return data;
     });
   }
 
@@ -135,17 +146,10 @@ function ObjectEditor({
     });
   }
 
-  useEffect(() => {
-    if (!selectedObject) {
-      return;
-    }
-    setTempObject(objects[selectedObject]);
-  }, [selectedObject]);
-
   return (
     <div className="edit">
       <div className="edit__create">
-        <h3>Create new country object</h3>
+        <h3>{title}</h3>
         <form onSubmit={createObject}>
           <input
             type="text"
@@ -165,6 +169,9 @@ function ObjectEditor({
           <div>
             {tempObject &&
               Object.keys(tempObject).map((key) => {
+                if (key === "cities") {
+                  return;
+                }
                 return (
                   <PropertyForm
                     key={key}
@@ -195,5 +202,42 @@ function ObjectEditor({
         </div>
       )}
     </div>
+  );
+}
+
+function PropertyForm({ keyText, valueText, updateKey, updateValue }) {
+  const [keyState, setKeyState] = useState(keyText);
+  const [valueState, setvalueState] = useState(valueText);
+
+  useEffect(() => {
+    setKeyState(keyText);
+    setvalueState(valueText);
+  }, [keyText, valueText]);
+
+  return (
+    <form className="property">
+      <label htmlFor="">Key: </label>
+      <input
+        type="text"
+        value={keyState}
+        onChange={(e) => {
+          setKeyState(e.target.value);
+        }}
+        onBlur={() => {
+          updateKey(keyText, keyState);
+        }}
+      />
+      <label htmlFor="">Value: </label>
+      <input
+        type="text"
+        value={valueState}
+        onChange={(e) => {
+          setvalueState(e.target.value);
+        }}
+        onBlur={() => {
+          updateValue(keyText, valueState);
+        }}
+      />
+    </form>
   );
 }
