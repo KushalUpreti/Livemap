@@ -1,33 +1,31 @@
 import "../styles/AdminApp.css";
 import ListEditor from "../components/ListEditor";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 export default function App() {
   const [countries, setCountries] = useState([]);
 
-  const countrySchema = {
+  const objectSchema = {
     name: "N/A",
     population: 0,
     language: "",
-    cities: [{ name: "N/A", population: 0, language: "" }],
+    cities: [],
   };
 
-  function createObject() {
-    const id = uuidv4();
-    const newCountry = { ...countrySchema, id };
-    setCountries((prev) => {
-      const object = [...prev];
-      object.push(newCountry);
-      return object;
-    });
-  }
+  const listPropSchema = {
+    cities: {
+      name: "N/A",
+      population: 0,
+      language: "",
+    },
+  };
 
   return (
     <main className="main">
       <ListEditor
         data={countries}
-        createObject={createObject}
+        objectSchema={objectSchema}
+        listPropSchema={listPropSchema}
         setObjects={setCountries}
         title="Country"
       />

@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import "../styles/AdminApp.css";
+import { v4 as uuidv4 } from "uuid";
 
-export default function ListEditor({ data, createObject, setObjects, title }) {
+export default function ListEditor({
+  data,
+  objectSchema,
+  listPropSchema,
+  setObjects,
+  title,
+}) {
   const [selectedObject, setSelectedObject] = useState(null);
 
-  function switchObjects(item) {
-    setSelectedObject(item);
+  function createObject() {
+    const id = uuidv4();
+    const newCountry = { ...objectSchema, id };
+    setObjects((prev) => {
+      const array = [...prev];
+      array.push(newCountry);
+      return array;
+    });
   }
 
   function switchObjects(item) {
@@ -29,7 +42,11 @@ export default function ListEditor({ data, createObject, setObjects, title }) {
         </div>
 
         {selectedObject && (
-          <ObjectEditor data={selectedObject} saveObject={setObjects} />
+          <ObjectEditor
+            data={selectedObject}
+            saveObject={setObjects}
+            listPropSchema={listPropSchema}
+          />
         )}
       </div>
     </>
@@ -63,7 +80,7 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectEditor({ data, saveObject }) {
+function ObjectEditor({ data, saveObject, listPropSchema }) {
   const [tempObject, setTempObject] = useState(data);
 
   useEffect(() => {
@@ -130,6 +147,8 @@ function ObjectEditor({ data, saveObject }) {
                     data={tempObject[key]}
                     title={key}
                     key={key}
+                    listPropSchema={{}}
+                    objectSchema={listPropSchema[key]}
                     setObjects={(callback) => {
                       updateValue(key, callback(tempObject[key]));
                     }}
