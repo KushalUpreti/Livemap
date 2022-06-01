@@ -175,11 +175,10 @@ function ObjectEditor({
     if (!selectedObject) {
       return;
     }
-    let currentObject = data.filter((item) => item.name === selectedObject);
-    setTempObject(currentObject[0]);
+    init();
   }, [selectedObject, data]);
 
-  function cancel() {
+  function init() {
     let currentObject = data.filter((item) => item.name === selectedObject);
     setTempObject(currentObject[0]);
   }
@@ -262,7 +261,7 @@ function ObjectEditor({
             >
               Save
             </button>
-            <button className="action-button cancel" onClick={cancel}>
+            <button className="action-button cancel" onClick={init}>
               Cancel
             </button>
           </div>

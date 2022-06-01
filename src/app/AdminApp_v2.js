@@ -55,7 +55,19 @@ export default function App() {
         </div>
 
         {selectedObject && (
-          <ObjectEditor data={selectedObject} saveObject={saveCountry} />
+          <ObjectEditor
+            data={selectedObject}
+            saveObject={saveCountry}
+            render={(data, saveFunction) => {
+              return (
+                <ObjectEditor
+                  data={data}
+                  saveObject={saveFunction}
+                  render={null}
+                />
+              );
+            }}
+          />
         )}
       </div>
     </main>
@@ -64,7 +76,7 @@ export default function App() {
 
 function ItemList({ data, switchFunction, selectedVar, title }) {
   return (
-    <div>
+    <div className="object-list">
       <h3>{title}</h3>
       <div>
         {data.map((item) => {
@@ -89,15 +101,47 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectEditor({ data, saveObject }) {
-  const [tempObject, setTempObject] = useState(data);
+function ObjectEditor({ data, saveObject, render }) {
+  const [tempObject, setTempObject] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
     setTempObject(data);
+    setSelectedCity(null);
   }, [data]);
 
   function init() {
     setTempObject(data);
+  }
+
+  function createCity() {
+    const cityId = uuidv4();
+    const newCity = {
+      id: cityId,
+      name: "N/A",
+      population: 0,
+      language: "N/A",
+    };
+    setTempObject((prev) => {
+      const obj = { ...prev };
+      const find = obj.cities.find((item) => item.id === cityId);
+      if (!find) {
+        obj.cities.push(newCity);
+      }
+      return obj;
+    });
+    setSelectedCity(newCity);
+  }
+
+  function saveCity(updatedCity) {
+    delete updatedCity[""];
+    setTempObject((prev) => {
+      let obj = { ...prev };
+      const cities = obj.cities;
+      let cityIndex = cities.findIndex((item) => item.id === updatedCity.id);
+      cities[cityIndex] = updatedCity;
+      return obj;
+    });
   }
 
   function addProperty() {
@@ -129,6 +173,10 @@ function ObjectEditor({ data, saveObject }) {
     });
   }
 
+  function switchCities(item) {
+    setSelectedCity(item);
+  }
+
   return (
     <div className="edit">
       <div>
@@ -150,6 +198,30 @@ function ObjectEditor({ data, saveObject }) {
                 />
               );
             })}
+
+          {render && (
+            <>
+              <div className="create">
+                <button
+                  onClick={() => {
+                    createCity(data.id);
+                  }}
+                >
+                  Create City
+                </button>
+              </div>
+
+              {tempObject && (
+                <ItemList
+                  data={tempObject.cities}
+                  switchFunction={switchCities}
+                  selectedVar={selectedCity ? selectedCity.id : null}
+                  title="Cities"
+                />
+              )}
+              {selectedCity && render(selectedCity, saveCity)}
+            </>
+          )}
 
           <button className="action-button" onClick={addProperty}>
             Add Property
