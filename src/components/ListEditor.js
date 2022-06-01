@@ -130,7 +130,9 @@ function ObjectEditor({ data, saveObject }) {
                     data={tempObject[key]}
                     title={key}
                     key={key}
-                    setObjects={(objects) => updateValue("cities", objects)}
+                    setObjects={(callback) => {
+                      updateValue(key, callback(tempObject[key]));
+                    }}
                   />
                 );
               }
