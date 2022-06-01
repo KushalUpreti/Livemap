@@ -5,19 +5,21 @@ import { useState } from "react";
 export default function App() {
   const [countries, setCountries] = useState([]);
 
-  const objectSchema = {
-    name: "N/A",
-    population: 0,
-    language: "",
-    cities: [],
-  };
-
-  const listPropSchema = {
-    cities: {
+  const objectSchema = () => {
+    return {
       name: "N/A",
       population: 0,
       language: "",
-    },
+      cities: [],
+    };
+  };
+
+  const listPropSchema = {
+    cities: () => ({
+      name: "N/A",
+      population: 0,
+      language: "",
+    }),
   };
 
   return (

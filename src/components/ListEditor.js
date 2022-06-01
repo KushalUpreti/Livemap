@@ -11,9 +11,15 @@ export default function ListEditor({
 }) {
   const [selectedObject, setSelectedObject] = useState(null);
 
+  // useEffect(() => {
+  //   if (data.length === 0) {
+  //     setSelectedObject(null);
+  //   }
+  // }, [data]);
+
   function createObject() {
     const id = uuidv4();
-    const newCountry = { ...objectSchema, id };
+    const newCountry = { ...objectSchema(), id };
     setObjects((prev) => {
       const array = [...prev];
       array.push(newCountry);
@@ -23,6 +29,15 @@ export default function ListEditor({
 
   function switchObjects(item) {
     setSelectedObject(item);
+  }
+
+  function save(updatedObj) {
+    setObjects((prev) => {
+      let array = [...prev];
+      let index = array.findIndex((item) => item.id === updatedObj.id);
+      array[index] = updatedObj;
+      return array;
+    });
   }
 
   return (
@@ -44,8 +59,8 @@ export default function ListEditor({
         {selectedObject && (
           <ObjectEditor
             data={selectedObject}
-            saveObject={setObjects}
             listPropSchema={listPropSchema}
+            save={save}
           />
         )}
       </div>
@@ -80,11 +95,11 @@ function ItemList({ data, switchFunction, selectedVar, title }) {
   );
 }
 
-function ObjectEditor({ data, saveObject, listPropSchema }) {
+function ObjectEditor({ data, listPropSchema, save }) {
   const [tempObject, setTempObject] = useState(data);
 
   useEffect(() => {
-    setTempObject(data);
+    init();
   }, [data]);
 
   function init() {
@@ -109,16 +124,6 @@ function ObjectEditor({ data, saveObject, listPropSchema }) {
       delete obj[key];
       obj[updatedKey] = value;
       return obj;
-    });
-  }
-
-  function save(updatedObj) {
-    delete updatedObj[""];
-    saveObject((prev) => {
-      let array = [...prev];
-      let index = array.findIndex((item) => item.id === updatedObj.id);
-      array[index] = updatedObj;
-      return array;
     });
   }
 
@@ -173,6 +178,7 @@ function ObjectEditor({ data, saveObject, listPropSchema }) {
           <button
             className="action-button save"
             onClick={() => {
+              delete tempObject[""];
               save(tempObject);
             }}
           >
