@@ -11,11 +11,11 @@ export default function ListEditor({
 }) {
   const [selectedObject, setSelectedObject] = useState(null);
 
-  // useEffect(() => {
-  //   if (data.length === 0) {
-  //     setSelectedObject(null);
-  //   }
-  // }, [data]);
+  useEffect(() => {
+    if (data.length === 0) {
+      setSelectedObject(null);
+    }
+  }, [data]);
 
   function createObject() {
     const id = uuidv4();
