@@ -35,10 +35,15 @@ export default function App() {
     if (!next) {
       return;
     }
+    updateNext(next, newValue);
+    resetSelect(index);
+  }
+
+  function updateNext(next, newValue) {
     const data = newValue[next];
     const mappedData = mapData(data);
     eval(`set${capitalize(next)}`)(mappedData);
-    resetSelect(index);
+    eval(`setSelected${capitalize(next)}`)(null);
   }
 
   function resetSelect(index) {
@@ -54,6 +59,7 @@ export default function App() {
       <label>Country</label>
       <Select
         options={countries}
+        value={selectedCountries ? selectedCountries : countries[0]}
         onChange={(newValue) => {
           onSelection(newValue, "countries");
         }}
@@ -62,6 +68,9 @@ export default function App() {
       <label>States</label>
       <Select
         options={states}
+        value={
+          selectedStates ? selectedStates : states.length > 0 ? states[0] : null
+        }
         onChange={(newValue) => {
           onSelection(newValue, "states");
         }}
@@ -70,6 +79,9 @@ export default function App() {
       <label>City</label>
       <Select
         options={cities}
+        value={
+          selectedCities ? selectedCities : cities.length > 0 ? cities[0] : null
+        }
         onChange={(newValue) => {
           onSelection(newValue, "cities");
         }}
