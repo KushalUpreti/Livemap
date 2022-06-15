@@ -26,3 +26,7 @@ export function groupBy(key, arr) {
     return { ...prev, [value]: [curr] };
   }, {});
 }
+
+export function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import data from "../utils/select-data.json";
+import { capitalize } from "../utils/utilityFunctions";
 
 export default function App() {
+  const schema = ["countries", "states", "cities"];
+
   const [countries, setCountries] = useState(() => {
     return mapData(data);
   });
-  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCountries, setSelectedCountries] = useState(null);
 
-  const [provinces, setProvinces] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState(null);
+  const [states, setStates] = useState([]);
+  const [selectedStates, setSelectedStates] = useState(null);
 
   const [cities, setCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCities, setSelectedCities] = useState(null);
 
   function mapData(data) {
     return data.map((item) => {
@@ -24,14 +27,26 @@ export default function App() {
     });
   }
 
-  function selectedValue(newValue, key, setData, setSelected) {
-    setSelected(newValue);
-    if (!key) {
+  function onSelection(newValue, key) {
+    const index = schema.findIndex((item) => item === key);
+    const current = schema[index];
+    const next = schema[index + 1];
+    eval(`setSelected${capitalize(current)}`)(newValue);
+    if (!next) {
       return;
     }
-    const data = newValue[key];
+    const data = newValue[next];
     const mappedData = mapData(data);
-    setData(mappedData);
+    eval(`set${capitalize(next)}`)(mappedData);
+    resetSelect(index);
+  }
+
+  function resetSelect(index) {
+    for (let i = index + 2; i < schema.length; i++) {
+      const element = schema[i];
+      eval(`set${capitalize(element)}`)([]);
+      eval(`setSelected${capitalize(element)}`)(null);
+    }
   }
 
   return (
@@ -40,15 +55,15 @@ export default function App() {
       <Select
         options={countries}
         onChange={(newValue) => {
-          selectedValue(newValue, "states", setProvinces, setSelectedCountry);
+          onSelection(newValue, "countries");
         }}
       />
 
       <label>States</label>
       <Select
-        options={provinces}
+        options={states}
         onChange={(newValue) => {
-          selectedValue(newValue, "cities", setCities, setSelectedProvince);
+          onSelection(newValue, "states");
         }}
       />
 
@@ -56,18 +71,9 @@ export default function App() {
       <Select
         options={cities}
         onChange={(newValue) => {
-          selectedValue(newValue, "", null, setSelectedCity);
+          onSelection(newValue, "cities");
         }}
       />
-    </>
-  );
-}
-
-function CascadeSelect({ title, data, onChangeHandler, parent }) {
-  return (
-    <>
-      <label>{title}</label>
-      <Select options={data} onChange={onChangeHandler} />
     </>
   );
 }
