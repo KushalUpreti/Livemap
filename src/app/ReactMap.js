@@ -23,7 +23,7 @@ export default function ReactMap() {
     if (!map.current || !map.current.isStyleLoaded()) {
       return;
     }
-    updateStats();
+    boundaryLayer = { ...boundaryLayer };
   }, [statsData]);
 
   const dataSources = {
@@ -58,7 +58,9 @@ export default function ReactMap() {
     type: "fill",
     source: "countries",
     "source-layer": "country_boundaries",
-    paint: {},
+    paint: {
+      "fill-color": updatedExpression(),
+    },
     beforeId: "admin-1-boundary-bg",
   };
 
@@ -75,10 +77,6 @@ export default function ReactMap() {
     filter: ["in", "iso_3166_1_alpha_3", ""],
     beforeId: "admin-1-boundary-bg",
   };
-
-  const onMapLoad = useCallback(() => {
-    updateStats();
-  }, []);
 
   function createColorRange(obj, size, path) {
     const layers = [];
@@ -116,15 +114,11 @@ export default function ReactMap() {
     return matchExpression;
   }
 
-  function updateStats() {
+  function updatedExpression() {
     const { data, size, path, property } = dataSources[statsData];
     const { layers, colors } = createColorRange(data, size, path);
-    setLayers(layers);
-    setColors(colors);
     const expression = generateMatchExpression(data, property, layers, colors);
-    map.current
-      .getMap()
-      .setPaintProperty("countries-join", "fill-color", expression);
+    return expression;
   }
 
   function setStatistics(key) {
@@ -140,7 +134,6 @@ export default function ReactMap() {
         mapboxAccessToken="pk.eyJ1IjoiaWN5aG90c2hvdG8iLCJhIjoiY2tmeHQwc3E5MjRxajJxbzhmbDN1bjJ5aiJ9.mNKmhIjRyKxFkJYrm4dMqg"
         style={{ width: 1300, height: 400 }}
         mapStyle="mapbox://styles/mapbox/light-v10"
-        onLoad={onMapLoad}
       >
         <Source {...source}>
           <Layer {...boundaryLayer} />
