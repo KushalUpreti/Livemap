@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import hdi from "../utils/stats/hdi.json";
 import covid from "../utils/stats/covid.json";
 import literacy from "../utils/stats/literacy.json";
@@ -46,16 +46,18 @@ export default function ReactMap() {
     url: "mapbox://mapbox.country-boundaries-v1",
   };
 
-  const boundaryLayer = {
-    id: "countries-join",
-    type: "fill",
-    source: "countries",
-    "source-layer": "country_boundaries",
-    paint: {
-      "fill-color": updatedExpression(),
-    },
-    beforeId: "admin-1-boundary-bg",
-  };
+  const boundaryLayer = useMemo(() => {
+    return {
+      id: "countries-join",
+      type: "fill",
+      source: "countries",
+      "source-layer": "country_boundaries",
+      paint: {
+        "fill-color": updatedExpression(),
+      },
+      beforeId: "admin-1-boundary-bg",
+    };
+  }, [statsData]);
 
   const highlightLayer = {
     id: "countries-highlighted",
