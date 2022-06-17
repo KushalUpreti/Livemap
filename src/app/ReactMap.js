@@ -19,13 +19,6 @@ export default function ReactMap() {
 
   const map = useRef(null);
 
-  useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) {
-      return;
-    }
-    boundaryLayer = { ...boundaryLayer };
-  }, [statsData]);
-
   const dataSources = {
     hdi: {
       data: hdi,
